@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include velometro *.css
+recursive-include velometro *.csv
+recursive-include velometro *.html
+recursive-include velometro *.ico
+recursive-include velometro *.js
+recursive-include velometro *.json
+recursive-include velometro *.md
+recursive-include velometro *.png
+recursive-include velometro *.py
+recursive-include velometro *.svg
+recursive-include velometro *.txt
+recursive-exclude velometro *.pyc
