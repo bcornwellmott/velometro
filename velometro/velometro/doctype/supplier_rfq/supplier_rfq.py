@@ -54,12 +54,18 @@ class SupplierRFQ(Document):
 		for i, item in enumerate(sorted(self.items, key=lambda item: item.item), start=1):
         		item.idx = i
 
+		# Go Through each item and get the supplier part number
+		for item in self.items:
+			item.supplier_code = find_supplier_PN(item.item, self.supplier)
+		
 		# Set the date 
 		self.rfq_date = frappe.utils.nowdate()
 
 	def on_submit(self):
 		# Test sending the e-mail
-		email_supplier(self) 
+		supplier_doc = frappe.get_doc("Supplier",self.supplier)
+		if supplier_doc.send_email_to_supplier == 1:
+			email_supplier(self) 
 
 
 @frappe.whitelist()
@@ -82,7 +88,15 @@ def email_supplier(self):
 		)
 	frappe.msgprint(_("Sent E-Mail to Supplier"))
 
-
+@frappe.whitelist()
+def find_supplier_PN(item, supplier):
+	"""Gets the supplier part number for a specific item"""
+	
+	item_doc = frappe.get_doc("Item", item)
+	for sup_item in item_doc.supplier_items:
+		if sup_item.supplier == supplier:
+			return sup_item.supplier_part_no
+	return ""		
  
 def get_attachments(rfq_item, attachments, attachment_list):
 	"""Gets the attachments from each of the RFQ items as specified"""
@@ -167,15 +181,9 @@ def create_supplier_quotation(source_name, target_doc = None):
 		target.item_code = obj.item
 		target.rate = 0
 		target.price_list_rate = 0
-		frappe.msgprint("parent {0}".format(target.parent))
-		frappe.msgprint("parenttype {0}".format(target.parenttype))
-		frappe.msgprint("name {0}".format(target.name))
 
 
-	#supplier_rfq =  frappe.get_doc("Supplier RFQ",source_name)  
-
-	#if target_doc.doctype == "Supplier Quotation": 
-		 
+	 
 	doc= get_mapped_doc("Supplier RFQ", source_name,{
 		"Supplier RFQ": { 
 			"doctype": "Supplier Quotation", 
@@ -193,9 +201,6 @@ def create_supplier_quotation(source_name, target_doc = None):
 		}}, target_doc,postprocess) 
 	
 
-	#else: 
-	#	frappe.throw(_("Create Supplier Quotation was passed the wrong doctype"))
-	
 	return doc 
 
 
