@@ -4,21 +4,25 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import flt
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
+from frappe.model.mapper import get_mapped_doc 
+from frappe.model.meta import get_field_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 from frappe.defaults import get_user_default 
+from erpnext.setup.utils import get_exchange_rate
 import json
 
-class BOM_Quote(Document):
+class BOMQuote(Document): 
 	
 	def validate(self):
 
 		unit_pcost = 0 
-		total_time = 0
+		total_time = 0 
 		unit_acost = 0
 		self.master_item = frappe.get_value("BOM", self.master_bom, "item")
 		self.description = frappe.get_value("Item", self.master_item, "description")
+		self.currency = frappe.get_value("Company", self.company, "default_currency")
 
 		bom_doc = frappe.get_doc("BOM", self.master_bom)
 		 
@@ -30,7 +34,7 @@ class BOM_Quote(Document):
 		for exp_item in bom_doc.exploded_items:
 			if not exp_item.item_code in item_list: 
 
-				doc = frappe.new_doc("BOM_Costing_Purchased_Item", bom_doc, "items") 
+				doc = frappe.new_doc("BOM Costing Purchased Item", bom_doc, "items") 
 				doc.item = exp_item.item_code 
 				doc.supplier = frappe.get_value("Item",doc.item,"default_supplier")
 				doc.price_list =  frappe.get_value("Item",doc.item,"default_supplier")
@@ -42,15 +46,22 @@ class BOM_Quote(Document):
 				self.append("items",doc)
 
 		for purchased in self.items:
-			purchased.qty = self.quantity * purchased.qty_per_asm 
+			purchased.qty = self.quantity * purchased.qty_per_asm  
 			purchased.purchase_rate = get_item_price(purchased, self.company)
 			if not purchased.taxes:
 				purchased.taxes = 0 
 			if not purchased.freight:
 				purchased.freight = 0
-			purchased.base_purchase_rate = purchased.purchase_rate
-			purchased.base_taxes = purchased.taxes
-			purchased.base_freight = purchased.freight
+
+			fields = ["purchase_rate", "taxes", "freight"]
+			from_currency = purchased.currency
+			to_currency = self.currency
+			conversion_rate = get_exchange_rate(from_currency, to_currency)
+			for f in fields:
+				
+				val = flt(flt(purchased.get(f), purchased.precision(f)) * conversion_rate, purchased.precision("base_" + f))
+				purchased.set("base_" + f, val) 
+
 			purchased.unit_price = purchased.purchase_rate + purchased.taxes + purchased.freight
 			purchased.base_unit_price = purchased.base_purchase_rate + purchased.base_taxes + purchased.base_freight
 			purchased.total_price = purchased.base_unit_price * purchased.qty_per_asm
@@ -94,6 +105,8 @@ class BOM_Quote(Document):
 def load_bom(source_name, target_doc = None): 
 	"""Loads the BOM items into the BOM Costing form""" 
 	
+
+	#frappe.msgprint("{0}".format(target_doc)) 
 	quantity = 0 
 	company = frappe.defaults.get_user_default("Company") or frappe.defaults.get_global_default("company")
 
@@ -119,26 +132,26 @@ def load_bom(source_name, target_doc = None):
 		target.purchase_rate = get_item_price(target, company)
 
 	
-	frappe.msgprint("Vehicle Quantity: {0}".format(quantity))
-	frappe.msgprint("Company: {0}".format(company))
+	#frappe.msgprint("Vehicle Quantity: {0}".format(quantity))
+	#frappe.msgprint("Company: {0}".format(company))
 	doc= get_mapped_doc("BOM", source_name,{ 
 		"BOM": { 
-			"doctype": "BOM_Quote", 
+			"doctype": "BOM Quote",
 			"field_map": {
 				"item": "master_item",	
-				"company": "company"		
+				"company": "company"	 	
 			}
 			
 		},
 		"BOM Explosion Item": {
-			"doctype": "BOM_Costing_Purchased_Item",
+			"doctype": "BOM Costing Purchased Item",
 			"field_map": {
 				"item_code": "item",
 				"description": "description",
 				"item_name": "item_name",
 				"qty": "qty_per_asm" 
 			},
-			"postprocess": process_item   
+			"postprocess": process_item 
 		}}, target_doc,postprocess)
 	
 
@@ -229,7 +242,7 @@ def get_taxes_charges(item, type, company):
 			applicable_charges = []
 			for tax_charge in quotation.taxes:
 				desc_list = "{" + tax_charge.description + "}"
-				frappe.msgprint("{0}".format(desc_list))
+				#frappe.msgprint("{0}".format(desc_list))
 				args = frappe._dict(json.loads(desc_list))
 				if args.type == type:
 					applicable_charges.append(args.qty)
@@ -239,7 +252,7 @@ def get_taxes_charges(item, type, company):
 				args = frappe._dict(json.loads("{" + desc_list + "}"))
 				if args.type == type and args.qty == applicable_charges[count-1]:
 					# We finally found the correct charge for freight
-					frappe.msgprint("{0}".format(tax_charge.price))
+					#frappe.msgprint("{0}".format(tax_charge.price))
 					return tax_charge.price
 		
 	else:
@@ -263,14 +276,14 @@ def get_bom_operation(bom):
 			num_operators = num_operators + 1
 			operations.append(op.operation)
 	
-	doc = frappe.new_doc("BOM_Costing_Operations", bom_doc, "operations") 
+	doc = frappe.new_doc("BOM Costing Operations", bom_doc, "operations") 
 	doc.minutes = atime
 	doc.num_operators = num_operators
 	doc.total_cost = cost
 	doc.bom = bom_doc.name 
 	doc.operations = ", ".join(filter(None, operations))
 	doc.idx = None
-	#{"doctype":"BOM_Costing_Operations", "minutes": time, "num_operators": num_operators, "total_cost": cost, "parent": bom_doc.name, "parentfield": "operations", "parenttype":"Bom_Quote"})
+	#{"doctype":"BO Costing Operations", "minutes": time, "num_operators": num_operators, "total_cost": cost, "parent": bom_doc.name, "parentfield": "operations", "parenttype":"BOM Quote"})
 
 	return doc
 	

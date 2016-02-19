@@ -1,7 +1,7 @@
 // Copyright (c) 2016, Velometro Mobility Inc and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('BOM_Quote', {
+frappe.ui.form.on('BOM Quote', {
 	validate: function(frm) {
 		frm.doc.prep_date = get_today();
 	
@@ -14,7 +14,7 @@ frappe.ui.form.on('BOM_Quote', {
 });
 
 
-frappe.ui.form.on('BOM_Quote', "master_bom", function(frm){
+frappe.ui.form.on('BOM Quote', "master_bom", function(frm){
 	frappe.model.map_current_doc({
 		method: "velometro.velometro.doctype.bom_quote.bom_quote.load_bom",
 		frm: cur_frm,
@@ -24,7 +24,7 @@ frappe.ui.form.on('BOM_Quote', "master_bom", function(frm){
 		'method': 'frappe.client.get',
 		'args': {
 			 'doctype': 'BOM',
-          		'name':frm.doc.master_bom				
+          		'name':frm.doc.master_bom			
 		},
 		'callback': function(item) {
 			frappe.model.set_value(frm.doctype,frm.docname,"master_item",item.message.item);
