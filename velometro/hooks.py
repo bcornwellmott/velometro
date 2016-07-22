@@ -71,9 +71,7 @@ app_license = "MIT"
 # Hook on document methods and events
 
 doc_events = {
-	"Supplier Quotation": { 
-		"on_submit": "velometro.velometro.supplier_quotation.add_pricing_rules" 
-	}   
+  
 }
 
  
