@@ -54,6 +54,10 @@ app_license = "MIT"
 
 # notification_config = "velometro.notifications.get_notification_config"
 
+# Fixtures
+# --------
+fixtures = ["Custom Field"]
+
 # Permissions
 # -----------
 # Permissions evaluated in scripted ways
