@@ -56,7 +56,7 @@ app_license = "MIT"
 
 # Fixtures
 # --------
-fixtures = ["Custom Field"]
+fixtures = ["Custom Field", "Custom Script"]
 
 # Permissions
 # -----------
