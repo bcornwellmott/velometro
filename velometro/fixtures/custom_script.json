@@ -1,0 +1,65 @@
+[
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Expense Claim Detail", 
+  "modified": "2015-05-27 13:48:07.244120", 
+  "name": "Expense Claim Detail-Client", 
+  "script": "cur_frm.cscript.custom_validate = function(doc) {\n    // calculate total gst applied\n    total_applied_gst = 0\n    $.each(doc.gst_applied) {\n\n        // calculate incentive\n        total = math.sum(gst_applied)\n\n        };\n\n    doc.total_incentive = total_incentive;\n}", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Expense Claim", 
+  "modified": "2015-06-29 12:20:53.954345", 
+  "name": "Expense Claim-Client", 
+  "script": "cur_frm.cscript.custom_milage_total = function() {\n  var sum = 0;  \n  $.each(doc.ee_car_mileage, function(i, d) { sum += d.qty });\n  cur_frm.set_value(doc, \"total_qty\", sum);\n}\n\n\ncur_frm.cscript.deposit_required = function(doc) {\nrate_calc = (doc.grand_total / 100 * 60);\ndoc.deposit_required = rate_calc;\nrefresh_field(\"deposit_required\");\n}\n\nfrappe.ui.form.on(\"PI_Sale Item\",{\n    \"set_totalcase\": function(frm) {\n      var tocases = 0;             \n      $.each(frm.doc.pisaleitem, function(i, d) {                        \n      tocases += d.cases;}      \n      );\n      frm.set_value(\"tocases\", tocases); \n    },                 \n    \"cases\": function(frm) {\n      frm.events.set_totalcase(frm);        \n    },         \n});\nfrappe.ui.form.on(\"Proforma Invoice\", \"refresh\", function(frm) {   \n    frm.events.set_totalcase(frm);\n})", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Purchase Order", 
+  "modified": "2016-01-22 12:12:52.904216", 
+  "name": "Purchase Order-Client", 
+  "script": "//frappe.ui.form.on(\"Purchase Order\", \"address__ship_to\",  function(frm){\n//frappe.call({\n //           \"method\": \"frappe.client.get\",\n  //          args: {\n   //             doctype: \"Address\",\n    //            name: frm.doc.address__ship_to\n     //       },\n      //      callback: function (data) {\n       //         frappe.model.set_value(frm.doctype,frm.docname, \"shipping_address\",\n        //            data.message.address_line1\n         //           + (data.message.address_line2 ?\n          //              (\"\\n\" + data.message.address_line2) : \"\")+ (data.message.city ?\n           //             (\"\\n\" + data.message.city) : \"\")+ (data.message.state ?\n            //            (\", \" + data.message.state) : \"\")+ (data.message.pincode ?\n             //           (\" \" + data.message.pincode) : \"\")+ (data.message.country ?\n              //          (\"\\n\" + data.message.country) : \"\"));\n          //  }\n      //  });\n\n\n//});\n\n//frappe.ui.form.on(\"Purchase Order\", \"onload\",function(frm)\n//{\n     \n     //var earliest_date =  new Date('2099-01-01');\n     //Get the required receiving date\n     //var i;\n     //for(i = 0; i < frm.doc.items.length;i++)\n     //{\n     //       if(frm.doc.items[i].schedule_date < earliest_date) {\n     //             earliest_date = frm.doc.items[i].schedule_date\n     //      }\n     //   }\n     //);\n     //frm.set_value(\"req_date\",earliest_date);\n// });\n\n", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Design Package", 
+  "modified": "2015-10-08 10:16:11.665356", 
+  "name": "Design Package-Client", 
+  "script": "//Automatically fill in the person who is responsible\ncur_frm.cscript.responsible=function(doc,cdt,cdn)\n{\n//Get the local variables of the child table (cdt) with the corresponding child name (cdn)\nvar d=locals[cdt][cdn]\n\n//Grab the first and last name from that User\nfrappe.call({\n            \"method\": \"frappe.client.get\",\n            args: {\n                doctype: \"User\",\n                name: d.responsible\n            },\n            callback: function (data) {\nfrappe.model.set_value(cdt,cdn,\"responsible_name\",  data.message.first_name+ \" \" + data.message.last_name);\n            }});\n\n//Refresh the table\nrefresh_field(\"designpkg_items\");\n}\n\n//Automatically fill in the item description\ncur_frm.cscript.item=function(doc,cdt,cdn)\n{\n//Get the local variables of the child table (cdt) with the corresponding child name (cdn)\nvar d=locals[cdt][cdn]\n\n//Grab the first and last name from that User\nfrappe.call({\n            \"method\": \"frappe.client.get\",\n            args: {\n                doctype: \"Item\",\n                name: d.item\n            },\n            callback: function (data) {\n\n      frappe.model.set_value(cdt,cdn,\"description\",  data.message.description);\n            }});\n\n//Refresh the table\nrefresh_field(\"designpkg_items\");\n}\n\n//Count the number of items, pending approval, needs revisions, and unapproved items in the package\ncur_frm.cscript.custom_validate = function(frm) {\n    // calculate incentives for each person on the deal\n    var inDesign= 0;\n    var DrawingsNeeded= 0;\n    var Ready4Review= 0;\n    var NeedsRevisions= 0;\n    var PendingApproval= 0;\n    var Approved= 0;\n    var Released= 0;\n    var totalCount = 0;\n    $.each(frm.designpkg_items, function(i, d) {\n       totalCount ++;\nif(d.status == \"In Design\"){ inDesign++;}\nif(d.status == \"Drawings Needed\"){ DrawingsNeeded++;}\nif(d.status == \"Ready for Review\"){ Ready4Review++;}\nif(d.status == \"Needs Revisions\"){ NeedsRevisions++;}\nif(d.status == \"Pending Approval\"){ PendingApproval++;}\nif(d.status == \"Approved\"){ Approved++;}\nif(d.status == \"Released\"){ Released++;}\n    });\n\n    if(Released == totalCount){ cur_frm.set_value(\"status\",\"Completed\");}\n    else { cur_frm.set_value(\"status\",\"In Progress\");}\n\n    cur_frm.set_value(\"qty_id\",inDesign);\n    cur_frm.set_value(\"qty_dn\",DrawingsNeeded);\n    cur_frm.set_value(\"qty_r4r\",Ready4Review);\n    cur_frm.set_value(\"qty_nr\",NeedsRevisions);\n    cur_frm.set_value(\"qty_pa\",PendingApproval);\n    cur_frm.set_value(\"qty_app\",Approved);\n    cur_frm.set_value(\"qty_rel\",Released);\n    cur_frm.set_value(\"qty\",totalCount);\n}", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "BOM", 
+  "modified": "2016-01-27 11:27:37.623149", 
+  "name": "BOM-Client", 
+  "script": "\nfrappe.ui.form.on(\"BOM\", \"update_bom_cost\", function(frm) {\n  var alist = [];\n  update_cost_and_exploded_items(frm,alist);\n  msgprint(\"Button is pressed\");\n \n});", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "BOM", 
+  "modified": "2016-01-27 17:44:35.217932", 
+  "name": "BOM Explosion Item-Client", 
+  "script": "cur_frm.cscript.update_bom_cost=function(frm)\n{\n\n    children = frm.exploded_items\n    for(i=0;i<children.length;i++)\n    {\n        msgprint(\"Updating\" + children[i].item_code);\n        frappe.call({\n            \"method\": \"frappe.client.get\",\n            args: {\n                doctype: \"Item\",\n                name: children[i].item_code\n            },\n            callback: function (data) {\n        msgprint(\"Updating with \" + data.message.default_supplier);\n        children.default_supplier = data.message.default_supplier\n            }});\n        \n    }\n\n}", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Request for Quotation", 
+  "modified": "2016-07-26 06:26:07.652308", 
+  "name": "Request for Quotation-Client", 
+  "script": "\nfrappe.ui.form.on(\"Request for Quotation\", {\n\tadd_attachments: function(frm) {\n        //console.log(cur_frm.doc);\n\t\tfor (var i = 0;i < cur_frm.doc.items.length; i++){\n\t\t\t\nvar item_code = cur_frm.doc.items[i].item_code;\nconsole.log(item_code);\nfrappe.call({\n            \"method\": \"frappe.client.get\",\n            args: {\n                doctype: \"Item\",\n                name: item_code \n            },\n            callback: function (data) {\n\t\t\t\tconsole.log(\"Adding Attachments\");\n\t\t\t\tconsole.log(data.message);\n               if (data.message.drawing_attachment){\nvar attachment = {file_url: data.message.drawing_attachment};\n\t\t\t\t\tadd_to_attachment(attachment );\n\t\t\t\t}\n\t\t\t\tif (data.message.stp_attachment){\nvar attachment = {file_url: data.message.stp_attachment};\nadd_to_attachment(attachment );\n\t\t\t\t}\n\t\t\t\tif (data.message.dwg_attachment){\nvar attachment = {file_url: data.message.dxf_attachment};\nadd_to_attachment(attachment );\n\t\t\t\t}\n\t\t\t\tif (data.message.x_t_attachment){\nvar attachment = {file_url: data.message.x_t_attachment};\nadd_to_attachment(attachment );\n\t\t\t\t}\n\n            }\n        })\n\t\t\t\n\t\t\t\t\n\t\t}\n\t}\n});\n\nfunction add_to_attachment (attachment) {\n\t console.log(\"Adding an Attachment\");\n\t\tvar form_attachments = cur_frm.get_docinfo().attachments;\nconsole.log(form_attachments);\n\t\tfor(var i in form_attachments) {\n\t\t\t// prevent duplicate\n\t\t\tif(form_attachments[i][\"name\"] === attachment.name) return;\n\t\t}\n\t\tform_attachments.push(attachment);\nconsole.log(form_attachments);\ncur_frm.refresh();\n\t}", 
+  "script_type": "Client"
+ }
+]
