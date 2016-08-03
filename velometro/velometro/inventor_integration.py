@@ -32,6 +32,17 @@ def get_item_tags():
 				
 	return ",".join(item_list)
 
+@frappe.whitelist(allow_guest=True)
+def get_tool_tags(): 
+	item_list = []
+	for d in frappe.db.sql("""select _user_tags	from `tabBOM` where not isnull(_user_tags)""",{}, as_dict=1):
+		mylist = d._user_tags.split(",")
+		for q in mylist:
+			if q not in item_list:
+				item_list.append(q)
+
+	return ",".join(item_list)
+	
 @frappe.whitelist()
 def get_affected_boms(item_code):
 	bom_list = []
