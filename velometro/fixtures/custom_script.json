@@ -1,0 +1,20 @@
+[
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Purchase Order", 
+  "modified": "2016-08-07 07:01:21.373063", 
+  "name": "Purchase Order-Client", 
+  "script": "frappe.ui.form.on(\"Purchase Order\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Load Attachments\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.attach_all_docs\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});", 
+  "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Request for Quotation", 
+  "modified": "2016-08-07 07:06:41.376183", 
+  "name": "Request for Quotation-Client", 
+  "script": "frappe.ui.form.on(\"Request for Quotation\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Load Attachments\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.attach_all_docs\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});", 
+  "script_type": "Client"
+ }
+]
