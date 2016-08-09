@@ -5,6 +5,7 @@ import frappe
 from frappe import _, throw
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, get_pricing_rules, filter_pricing_rules, apply_pricing_rule
 from frappe.utils import flt
+from frappe.desk.tags import DocTags
 
 @frappe.whitelist()
 def get_item_revision_list(item_code):
@@ -16,6 +17,23 @@ def get_item_revision_list(item_code):
 	
 	return item_list
 	
+
+@frappe.whitelist()
+def add_tag(dt,dn,tag): 
+	DocTags(dt).add(dn,tag)			
+	return tag
+	
+@frappe.whitelist()
+def remove_tag(dt,dn,tag): 
+	DocTags(dt).remove(dn,tag)		
+	return tag
+
+@frappe.whitelist()
+def update_tags(dt,dn,tags):
+	tl = tags.split(',')
+	DocTags(dt).update(dn,tl)
+	
+
 @frappe.whitelist(allow_guest=True)
 def get_item_tags(): 
 	item_list = []
@@ -46,9 +64,7 @@ def get_tool_tags():
 @frappe.whitelist()
 def get_affected_boms(item_code):
 	bom_list = []
-	frappe.msgprint("Running")
 	for d in frappe.db.sql("""select bom.name from `tabBOM` bom, `tabBOM Item` fbi, `tabItem` item where bom.name = fbi.parent and bom.is_active = 1 and fbi.item_code = item.item_code and  item.variant_of  = %(item_code)s""",{"item_code":item_code}, as_dict=1):
-		frappe.msgprint("Got in the loop")
 		bom_list.append(d.name)
 	return bom_list
 	
