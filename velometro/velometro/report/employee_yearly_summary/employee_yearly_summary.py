@@ -25,6 +25,7 @@ def get_hours(employee, fiscal_year):
 	ytd_total = 0
 	ytd_vacation = 0
 	ytd_stat = 0
+	ytd_lieu = 0
 	ytd_sick = 0
 	ytd_ot = 0
 	
@@ -33,6 +34,7 @@ def get_hours(employee, fiscal_year):
 	prev_vacation_hrs = 0
 	prev_sick_hrs = 0
 	prev_stat_hrs = 0
+	prev_lieu_hrs = 0
 	prev_ot_hrs = 0
 
 	m = get_month_details(fiscal_year, 1)
@@ -46,6 +48,9 @@ def get_hours(employee, fiscal_year):
 			prev_stat_hrs += timesheet_hrs.hours
 		if "Sick" in timesheet_hrs.type:
 			prev_sick_hrs += timesheet_hrs.hours
+		if "Lieu" in timesheet_hrs.type:
+			prev_lieu_hrs += timesheet_hrs.hours
+			prev_total_hrs -= timesheet_hrs.hours
 				
 	#Get the starting value working days
 	joining_date = frappe.db.get_value("Employee", employee,["date_of_joining"])
@@ -53,7 +58,9 @@ def get_hours(employee, fiscal_year):
 	working_days = date_diff(start_date, joining_date) + 1 - len(holidays)
 	prev_ot_hrs = prev_total_hrs - 8 * working_days
 	if prev_ot_hrs < 0:
-		prev_ot_hrs = 0		
+		prev_ot_hrs = 0	
+	prev_ot_hrs -= prev_lieu_hrs	
+		
 				
 	row = frappe._dict({
 		"month": "START OF YEAR",
@@ -61,6 +68,7 @@ def get_hours(employee, fiscal_year):
 		"vacation_hours": prev_vacation_hrs,
 		"sick_hours": prev_sick_hrs,
 		"statutory_hours": prev_stat_hrs,
+		"lieu_hours": prev_lieu_hrs,
 		"overtime_hours": prev_ot_hrs
 		})
 	out.append(row)
@@ -70,6 +78,7 @@ def get_hours(employee, fiscal_year):
 		vacation_hrs = 0
 		sick_hrs = 0
 		stat_hrs = 0
+		lieu_hrs = 0
 		ot_hrs = 0
 		index = month_list.index(month)
 		m = get_month_details(fiscal_year, index+1)
@@ -88,21 +97,28 @@ def get_hours(employee, fiscal_year):
 			if "Sick" in timesheet_hrs.type:
 				sick_hrs += timesheet_hrs.hours
 				ytd_sick += timesheet_hrs.hours
+			if "Lieu" in timesheet_hrs.type:
+				lieu_hrs += timesheet_hrs.hours
+				ytd_lieu += timesheet_hrs.hours
+				total_hrs -= timesheet_hrs.hours
+				ytd_total -= timesheet_hrs.hours
 				
 		#Get the hours in each month you're supposed to work
 		holidays = get_holidays_for_employee(employee, start_date, end_date)
 		working_days = date_diff(end_date, start_date) + 1 - len(holidays)
-		ot_hrs = total_hrs - 8 * working_days
+		ot_hrs = total_hrs - 8 * working_days 
 		if ot_hrs < 0:
 			ot_hrs = 0
+		ot_hrs -= lieu_hrs
 		
-		ytd_ot += ot_hrs
+		ytd_ot += ot_hrs 
 		row = frappe._dict({
 				"month": month,
 				"total_hours": total_hrs,
 				"vacation_hours": vacation_hrs,
 				"sick_hours": sick_hrs,
 				"statutory_hours": stat_hrs,
+				"lieu_hours": lieu_hrs,
 				"overtime_hours": ot_hrs
 			})
 		out.append(row)
@@ -112,6 +128,7 @@ def get_hours(employee, fiscal_year):
 		"vacation_hours": ytd_vacation,
 		"sick_hours": ytd_sick,
 		"statutory_hours": ytd_stat,
+		"lieu_hours": ytd_lieu,
 		"overtime_hours": ytd_ot
 		})
 	out.append(row)
@@ -121,6 +138,7 @@ def get_hours(employee, fiscal_year):
 		"vacation_hours": ytd_vacation + prev_vacation_hrs,
 		"sick_hours": ytd_sick + prev_sick_hrs,
 		"statutory_hours": ytd_stat + prev_stat_hrs,
+		"lieu_hours": ytd_lieu + prev_lieu_hrs,
 		"overtime_hours": ytd_ot + prev_ot_hrs
 		})
 	out.append(row)
@@ -153,12 +171,12 @@ def get_columns():
 		"options": "",
 		"width": 120
 	}, {
-		"fieldname": "statutory_hours",
-		"label": "Stat Holiday Hours",
+		"fieldname": "lieu_hours",
+		"label": "Time in Lieu",
 		"fieldtype": "Float",
 		"options": "",
 		"width": 140
-	}, {
+	},{
 		"fieldname": "overtime_hours",
 		"label": "Overtime Hours",
 		"fieldtype": "Float",
