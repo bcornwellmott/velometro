@@ -85,7 +85,12 @@ def get_hours(employee, fiscal_year):
 		start_date = m['month_start_date']
 		end_date = m['month_end_date']
 		
-		for timesheet_hrs in frappe.db.sql("""select detail.hours as hours, detail.activity_type as type from `tabTimesheet Detail` as detail, `tabTimesheet` as sheet where detail.from_time BETWEEN %(start_time)s and %(end_time)s and detail.parent = sheet.name and sheet.docstatus = 1 and sheet.employee = %(employee)s""", {"employee": employee, "start_time":start_date, "end_time": end_date}, as_dict=1):
+		for timesheet_hrs in frappe.db.sql("""SELECT detail.hours as hours, detail.activity_type as type 
+			FROM `tabTimesheet Detail` as detail, `tabTimesheet` as sheet 
+			WHERE cast(detail.from_time as date) BETWEEN %(start_time)s AND %(end_time)s AND 
+			detail.parent = sheet.name AND 
+			sheet.docstatus = 1 AND 
+			sheet.employee = %(employee)s""", {"employee": employee, "start_time":start_date, "end_time": end_date}, as_dict=1):
 			total_hrs += timesheet_hrs.hours
 			ytd_total += timesheet_hrs.hours
 			if "Vacation" in timesheet_hrs.type:
