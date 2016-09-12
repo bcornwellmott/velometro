@@ -5,18 +5,20 @@ import frappe
 from frappe import _, throw
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item, get_pricing_rules, filter_pricing_rules, apply_pricing_rule
 from frappe.utils import flt
+import json
 
 @frappe.whitelist()
-def add_pricing_rules(quotation, method=None):
+def add_pricing_rules(mquotation, method=None):
 	"""This function adds all the items to pricing rules"""
 	frappe.msgprint(_("Adding Pricing Rules"))
+	quotation = frappe.get_doc("Supplier Quotation",mquotation)
 	
 	# Loop through all of the items in the price list 
 	for item_doc in quotation.items:
 		#  check to see if there are any pricing rules that fall into the specified quantity/supplier
 		#frappe.msgprint(_("Checking pricing rules of {0} for previous prices".format(item_doc.item_code)))
 
-		item = frappe.get_doc("Item",item_doc.item_code)
+		item = frappe.get_doc("Item",item_doc.item_code) 
 
 		args = {
 			"doctype": item_doc.doctype,
