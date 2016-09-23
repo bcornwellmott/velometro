@@ -71,19 +71,20 @@ def add_pricing_rules(mquotation, method=None):
 @frappe.whitelist()
 def copy_pricing_rule_from_previous_revision(base_item_code, current_rev):
 	"""This function adds all the items to pricing rules"""
-	frappe.msgprint(_("Copying Pricing Rules"))
+	
 	args = {
 		
 		"item_code": str(base_item_code) + "_" + str(int(current_rev)-1), 
 		"transaction_type": "buying"
 	}
 	
-
-	args = frappe._dict(args)
 	
+	args = frappe._dict(args)
+	frappe.msgprint(_("Copying Pricing Rules for " + args.item_code))
 	pr_result = get_pricing_rules(args) 
 	
 	for myrule in pr_result:
+		frappe.msgprint(_("Copying Pricing Rule " + myrule.pricing_rule))
 		# Check to see if the pricing rule matches quantity min exactly
 		rule = frappe.get_doc("Pricing Rule", myrule.pricing_rule)
 		pr_title = item_doc.item_code + "-" + quotation.supplier + "-" + str(item_doc.qty)
