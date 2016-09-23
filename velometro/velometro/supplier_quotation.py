@@ -68,6 +68,25 @@ def add_pricing_rules(mquotation, method=None):
 					#frappe.msgprint(_("Incorporating new Pricing rule between others".format(pr.name, pr.priority))) 
 
 
-				 
+@frappe.whitelist()
+def copy_pricing_rule_from_previous_revision(base_item_code, current_rev):
+	"""This function adds all the items to pricing rules"""
+	frappe.msgprint(_("Copying Pricing Rules"))
+	args = {
+		
+		"item_code": str(base_item_code) + "_" + str(int(current_rev)-1), 
+		"transaction_type": "buying"
+	}
+	
 
+	args = frappe._dict(args)
+	
+	pr_result = get_pricing_rules(args) 
+	
+	for myrule in pr_result:
+		# Check to see if the pricing rule matches quantity min exactly
+		rule = frappe.get_doc("Pricing Rule", myrule.pricing_rule)
+		pr_title = item_doc.item_code + "-" + quotation.supplier + "-" + str(item_doc.qty)
+		new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": rule.min_qty, "apply_on": rule.apply_on, "item_code": args.item_code, "priority": rule.priority, "buying": rule.buying, "applicable_for": rule.applicable_for, "company": rule.company, "price_or_discount": rule.price_or_discount, "price": rule.price, "supplier": rule.supplier, "for_price_list" : rule.for_price_list, "title": pr_title, "from_supplier_quotation": rule.from_supplier_quotation })
+		new_rule.insert()
 
