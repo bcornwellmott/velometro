@@ -71,9 +71,8 @@ def add_pricing_rules(mquotation, method=None):
 @frappe.whitelist()
 def copy_pricing_rule_from_previous_revision(base_item_code, current_rev):
 	"""This function adds all the items to pricing rules"""
-	
+	new_code = str(base_item_code) + "_" + str(int(current_rev))
 	args = {
-		
 		"item_code": str(base_item_code) + "_" + str(int(current_rev)-1), 
 		"transaction_type": "buying"
 	}
@@ -83,11 +82,12 @@ def copy_pricing_rule_from_previous_revision(base_item_code, current_rev):
 	frappe.msgprint(_("Copying Pricing Rules for " + args.item_code))
 	pr_result = get_pricing_rules(args) 
 	
-	for myrule in pr_result:
-		frappe.msgprint(_("Copying Pricing Rule " + myrule.pricing_rule))
-		# Check to see if the pricing rule matches quantity min exactly
-		rule = frappe.get_doc("Pricing Rule", myrule.pricing_rule)
-		pr_title = item_doc.item_code + "-" + quotation.supplier + "-" + str(item_doc.qty)
-		new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": rule.min_qty, "apply_on": rule.apply_on, "item_code": args.item_code, "priority": rule.priority, "buying": rule.buying, "applicable_for": rule.applicable_for, "company": rule.company, "price_or_discount": rule.price_or_discount, "price": rule.price, "supplier": rule.supplier, "for_price_list" : rule.for_price_list, "title": pr_title, "from_supplier_quotation": rule.from_supplier_quotation })
+	
+	pr_result =  frappe.db.sql("""SELECT * FROM `tabPricing Rule` WHERE item_code=%(item_code)s ORDER by priority desc, name desc""", args , as_dict=1)
+			
+	for rule in pr_result:
+		frappe.msgprint("Copying rule: " + str(rule.name))
+		pr_title = new_code + "-" + rule.supplier + "-" + str(rule.min_qty)
+		new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": rule.min_qty, "apply_on": rule.apply_on, "item_code": new_code, "priority": rule.priority, "buying": rule.buying, "applicable_for": rule.applicable_for, "company": rule.company, "price_or_discount": rule.price_or_discount, "price": rule.price, "supplier": rule.supplier, "for_price_list" : rule.for_price_list, "title": pr_title, "from_supplier_quotation": rule.from_supplier_quotation })
 		new_rule.insert()
 
