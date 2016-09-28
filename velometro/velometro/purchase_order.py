@@ -74,7 +74,7 @@ def zip_attachments(document):
 	fname = get_file_name(document2.name + ".zip", random_string(7))
 	
 	import zipfile
-	docZip = zipfile.ZipFile(fname,"w")
+	docZip = zipfile.ZipFile(fname,"w", zipfile.ZIP_DEFLATED)
 	
 	
 	for file_url in frappe.db.sql("""select file_url, is_private from `tabFile` where attached_to_doctype = %(doctype)s and attached_to_name = %(docname)s""", {'doctype': document2.doctype, 'docname': document2.name}, as_dict=True ):
