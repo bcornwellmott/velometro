@@ -52,7 +52,6 @@ def attach_all_docs(document):
 				count = count + 1
 				myFile = save_url(attach, document2.doctype, document2.name, "Home/Attachments")
 				myFile.file_name = attach
-				myFile.is_private = 1
 				myFile.save()
 	frappe.msgprint("Attached {0} files".format(count))
 		
