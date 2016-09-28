@@ -66,12 +66,13 @@ def add_bom_items(items, item_code):
 
 @frappe.whitelist()	
 def zip_attachments(document):
-	
+	zip_count = 1
+	zip_size = 0
 	document = json.loads(document)
 	document2 = frappe._dict(document)
 
 	
-	fname = get_file_name(document2.name + ".zip", random_string(7))
+	fname = get_file_name(document2.name + " (zip 1).zip", random_string(7))
 	
 	import zipfile
 	docZip = zipfile.ZipFile(fname,"w", zipfile.ZIP_DEFLATED)
@@ -87,7 +88,21 @@ def zip_attachments(document):
 			path = get_files_path(*file_url.file_url.split("/files/", 1)[1].split("/"))
 		
 		path = encode(path)
+		if zip_size + os.path.getsize(path) > 10000000:
+			zip_count = zip_count + 1
+			zip_size = 0
+			docZip.close()
+			with open(encode(fname), 'r') as f:
+				content = f.read()
+			
+			content = base64.b64encode(content)
+				
+			save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", 1)
+			fname = get_file_name(document2.name + " (zip " + str(zip_count) + ").zip", random_string(7))
+			docZip = zipfile.ZipFile(fname,"w", zipfile.ZIP_DEFLATED)
 		docZip.write(path, os.path.basename(path))
+		zip_size  = zip_size + docZip.getinfo(os.path.basename(path)).compress_size
+		
 
 	docZip.close()
 	with open(encode(fname), 'r') as f:
