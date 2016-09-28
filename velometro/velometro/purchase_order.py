@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 
 import frappe
+import os, base64
 from frappe import _, throw
 from frappe.utils import flt
-from frappe.utils.file_manager import save_url
+from frappe.utils.file_manager import save_url, save_file, get_file_name
+from frappe.utils import get_site_path, get_files_path, random_string, encode
 import json
 
 
@@ -50,6 +52,7 @@ def attach_all_docs(document):
 				count = count + 1
 				myFile = save_url(attach, document2.doctype, document2.name, "Home/Attachments")
 				myFile.file_name = attach
+				myFile.is_private = 1
 				myFile.save()
 	frappe.msgprint("Attached {0} files".format(count))
 		
@@ -61,6 +64,36 @@ def add_bom_items(items, item_code):
 			items.append(bom_item.item_code)
 			items = add_bom_items(items, bom_item.item_code)
 	return items
-			 
 
+@frappe.whitelist()	
+def zip_attachments(document):
+	
+	document = json.loads(document)
+	document2 = frappe._dict(document)
 
+	
+	fname = get_file_name(document2.name + ".zip", random_string(7))
+	
+	import zipfile
+	docZip = zipfile.ZipFile(fname,"w")
+	
+	
+	for file_url in frappe.db.sql("""select file_url, is_private from `tabFile` where attached_to_doctype = %(doctype)s and attached_to_name = %(docname)s""", {'doctype': document2.doctype, 'docname': document2.name}, as_dict=True ):
+		frappe.msgprint("Adding " + file_url.file_url)
+		
+		if file_url.file_url.startswith("/private/files/"):
+			path = get_files_path(*file_url.file_url.split("/private/files/", 1)[1].split("/"), is_private=1)
+
+		elif file_url.file_url.startswith("/files/"):
+			path = get_files_path(*file_url.file_url.split("/files/", 1)[1].split("/"))
+		
+		path = encode(path)
+		docZip.write(path, os.path.basename(path))
+
+	docZip.close()
+	with open(encode(fname), 'r') as f:
+		content = f.read()
+	
+	content = base64.b64encode(content)
+		
+	save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", 1)
