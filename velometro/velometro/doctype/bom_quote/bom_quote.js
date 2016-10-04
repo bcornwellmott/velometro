@@ -16,7 +16,7 @@ frappe.ui.form.on('BOM Quote', {
 
 frappe.ui.form.on('BOM Quote', "master_bom", function(frm){
 	console.log("TEST")
-	frappe.model.map_current_doc({
+	erpnext.utils.map_current_doc({
 		method: "velometro.velometro.doctype.bom_quote.bom_quote.load_bom",
 		frm: cur_frm,
 		source_name: frm.doc.master_bom
