@@ -146,7 +146,7 @@ def load_bom(source_name, target_doc = None):
 		"BOM Explosion Item": {
 			"doctype": "BOM Costing Purchased Item",
 			"field_map": {
-				"item_code": "item",
+				"item_code": "exp_item",
 				"description": "description",
 				"item_name": "item_name",
 				"qty": "qty_per_asm" 
