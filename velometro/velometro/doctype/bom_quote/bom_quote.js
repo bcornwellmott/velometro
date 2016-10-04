@@ -15,12 +15,13 @@ frappe.ui.form.on('BOM Quote', {
 
 
 frappe.ui.form.on('BOM Quote', "master_bom", function(frm){
-	console.log("TEST")
+	/*console.log("TEST")
 	erpnext.utils.map_current_doc({
 		method: "velometro.velometro.doctype.bom_quote.bom_quote.load_bom",
 		frm: cur_frm,
 		source_name: frm.doc.master_bom
 	});
+	cur_frm.reload_doc();
 	frm.call({
 		'method': 'frappe.client.get',
 		'args': {
@@ -28,23 +29,24 @@ frappe.ui.form.on('BOM Quote', "master_bom", function(frm){
           		'name':frm.doc.master_bom			
 		},
 		'callback': function(item) {
+
 			frappe.model.set_value(frm.doctype,frm.docname,"master_item",item.message.item);
 			frm.call({
 				'method': 'frappe.client.get',
 				'args': {
 				 'doctype': 'Item',
-        		  		'name':frm.doc.master_item					
+        		  		'name':item.message.item				
 				},	
 				'callback': function(item) {
-					frappe.model.set_value(frm.doctype,frm.docname,"item_description",item.message.description);
-					cur_frm.reload_doc();
+					frappe.model.set_value(cur_frm.doctype,cur_frm.docname,"item_description",item.message.description);
+					
 		
 				}
 		});
 
 
 		}
-	});
+	});*/
 	 frm.set_df_property("master_bom", "read_only", 1);
 
 
