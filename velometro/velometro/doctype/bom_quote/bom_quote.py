@@ -57,6 +57,9 @@ class BOMQuote(Document):
 			from_currency = purchased.currency
 			to_currency = self.currency
 			conversion_rate = get_exchange_rate(from_currency, to_currency)
+			if not conversion_rate:
+				conversion_rate = 0
+			#frappe.msgprint(conversion_rate)
 			for f in fields:
 				
 				val = flt(flt(purchased.get(f), purchased.precision(f)) * conversion_rate, purchased.precision("base_" + f))
@@ -125,11 +128,15 @@ def load_bom(source_name, target_doc = None):
 		
 	def process_item(obj, target, source_parent):
 		item_doc = frappe.get_doc("Item",obj.item_code)
+		frappe.msgprint(str(obj))
 		target.supplier = item_doc.default_supplier
+		
 		target.price_list = item_doc.default_supplier
+		frappe.msgprint("Getting Supplier")
 		target.currency = frappe.get_value("Supplier", target.supplier,"default_currency") 
 		target.qty = target.qty_per_asm * quantity
 		target.purchase_rate = get_item_price(target, company)
+		frappe.msgprint("Done")
 
 	
 	#frappe.msgprint("Vehicle Quantity: {0}".format(quantity))
@@ -159,7 +166,8 @@ def load_bom(source_name, target_doc = None):
 
 def get_item_price(item, company):
 	"""Gets the item price from the price list taking in the total number of assemblies being made and name of the company"""
-
+	frappe.msgprint("Getting Item Price")
+	frappe.msgprint(str(item))
 	#Get the Item 
 	item_doc = frappe.get_doc("Item",item.item)
 
