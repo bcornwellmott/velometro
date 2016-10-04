@@ -37,6 +37,7 @@ frappe.ui.form.on('BOM Quote', "master_bom", function(frm){
 				},	
 				'callback': function(item) {
 					frappe.model.set_value(frm.doctype,frm.docname,"item_description",item.message.description);
+					cur_frm.reload_doc();
 		
 				}
 		});
