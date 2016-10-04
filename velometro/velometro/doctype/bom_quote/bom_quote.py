@@ -29,7 +29,7 @@ class BOMQuote(Document):
 		item_list = []
 
 		for purchased in self.items:
-			item_list.append(purchased.item)
+			item_list.append(purchased.item_code)
 
 		for exp_item in bom_doc.exploded_items:
 			if not exp_item.item_code in item_list: 
