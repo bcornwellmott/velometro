@@ -9,18 +9,21 @@ import frappe
 
 def execute(filters=None):
 	
-	itemqty_list = get_itemquantity_list(filters.supplier_quotation)
+	supplier = frappe.db.get_value("Supplier Quotation", filters.supplier_quotation,"supplier")
+	supplier_currency = frappe.db.get_value("Supplier", supplier,"default_currency")
+	
+	itemqty_list = get_itemquantity_list(filters.supplier_quotation, supplier_currency)
 	
 	if filters.sourced_check == 1:
-		data = get_item_list(filters.supplier_quotation, itemqty_list)
+		data = get_item_list(filters.supplier_quotation, itemqty_list, filters.mask_names)
 	else:
-		data = get_min_item_list(filters.supplier_quotation, itemqty_list)
+		data = get_min_item_list(filters.supplier_quotation, itemqty_list, filters.mask_names)
 	
-	columns = get_columns(itemqty_list, filters.supplier)
+	columns = get_columns(itemqty_list, supplier)
 	
 	return columns, data
 
-def get_min_item_list(quote, qty_list):
+def get_min_item_list(quote, qty_list, mask):
 	
 	out = []
 	
@@ -43,7 +46,10 @@ def get_min_item_list(quote, qty_list):
 				
 				if iprice:
 					exg = get_exchange_rate(supplier_currency,company_currency) or 1
-					percent = flt(100*(root.rate - iprice.price * exg) / iprice.price)
+					if iprice.price == 0:
+						percent = 100
+					else:
+						percent = flt(100*(root.rate - iprice.price * exg) / iprice.price)
 				else:
 					exg = 1
 					percent = 0
@@ -54,11 +60,13 @@ def get_min_item_list(quote, qty_list):
 					"lowest_supplier": iprice.supplier,
 					"percent_diff": percent
 				})
+				if mask == 1:
+					row["lowest_supplier"] = "Redacted"
 				out.append(row)
 
 	return out
 	
-def get_item_list(quote, qty_list):
+def get_item_list(quote, qty_list, mask):
 	
 	out = []
 	
@@ -89,11 +97,13 @@ def get_item_list(quote, qty_list):
 				"lowest_supplier": root.supplier,
 				"percent_diff": percent
 			})
+			if mask == 1:
+					row["lowest_supplier"] = "Redacted"
 			out.append(row)
 
 	return out
 	
-def get_itemquantity_list(item):
+def get_itemquantity_list(item, supplier_currency):
 	
 	out = []
 	
@@ -101,12 +111,17 @@ def get_itemquantity_list(item):
 	if item:
 		qty_list = frappe.db.sql("""select item_code, qty, rate from `tabSupplier Quotation Item` as item where parent =%s and docstatus = 1""", item, as_dict=1)
 		qty_list.sort(reverse=False)
+		
+		company_currency = frappe.db.get_default("currency")
+		exg = get_exchange_rate(supplier_currency,company_currency) or 1
+					
+					
 		for qt in qty_list:
 			col = frappe._dict({
 				"key": str(qt.item_code) + " x" + str(qt.qty),
 				"item_code": qt.item_code,
 				"qty": qt.qty,
-				"rate": qt.rate,
+				"rate": qt.rate * exg,
 				"label": str(qt.item_code) + " x" + str(qt.qty)
 			})
 			out.append(col)
