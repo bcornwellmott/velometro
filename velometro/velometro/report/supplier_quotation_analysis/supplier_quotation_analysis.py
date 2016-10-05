@@ -11,12 +11,52 @@ def execute(filters=None):
 	
 	itemqty_list = get_itemquantity_list(filters.supplier_quotation)
 	
-	data = get_item_list(filters.supplier_quotation, itemqty_list)
+	if filters.sourced_check == 1:
+		data = get_item_list(filters.supplier_quotation, itemqty_list)
+	else:
+		data = get_min_item_list(filters.supplier_quotation, itemqty_list)
 	
 	columns = get_columns(itemqty_list, filters.supplier)
 	
 	return columns, data
 
+def get_min_item_list(quote, qty_list):
+	
+	out = []
+	
+	if quote:
+		low_price_data = []
+		low_supplier = []
+		company = frappe.db.get_default("company")
+		company_currency = frappe.db.get_default("currency")
+		# Get the default supplier of suppliers
+
+			
+		#Add a row for each item/qty
+		for root in qty_list:
+
+			price = get_min_item_price(root,company)
+			#frappe.msgprint(str(price))
+			for iprice in price:
+				supplier_currency = frappe.db.get_value("Supplier", iprice.supplier,"default_currency")
+				
+				
+				if iprice:
+					exg = get_exchange_rate(supplier_currency,company_currency) or 1
+					percent = flt(100*(root.rate - iprice.price * exg) / iprice.price)
+				else:
+					exg = 1
+					percent = 0
+				row = frappe._dict({
+					"line_item": root.label,
+					"supplier_price": root.rate,
+					"lowest_price": iprice.price * exg,
+					"lowest_supplier": iprice.supplier,
+					"percent_diff": percent
+				})
+				out.append(row)
+
+	return out
 	
 def get_item_list(quote, qty_list):
 	
@@ -107,6 +147,19 @@ def get_columns(qty_list, supplier):
 	},]
 
 	return columns
+
+def get_min_item_price(item, company):
+	"""Gets the item price from the price list taking in the total number of assemblies being made and name of the company"""
+	#frappe.msgprint(str(item))
+
+	price =  frappe.db.sql("""SELECT price, supplier
+		FROM `tabPricing Rule`
+		WHERE item_code = %(item_code)s
+			AND buying = 1 AND min_qty <= %(qty)s 
+			AND apply_on = "Item Code" AND applicable_for = "Supplier" 
+			ORDER BY price ASC, priority DESC LIMIT 1 """, {"item_code": item.item_code, "qty": item.qty}, as_dict=1)
+	
+	return price 
 	
 def get_item_price(item, company):
 	"""Gets the item price from the price list taking in the total number of assemblies being made and name of the company"""
