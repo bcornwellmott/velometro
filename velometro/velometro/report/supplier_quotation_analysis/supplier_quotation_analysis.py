@@ -38,9 +38,10 @@ def get_item_list(quote, qty_list):
 			price = get_item_price(root,company)
 				
 			exg = get_exchange_rate(supplier_currency,company_currency) or 1
-			
-			percent = flt(100*(root.rate - price * exg) / price)
-			
+			if price:
+				percent = flt(100*(root.rate - price * exg) / price)
+			else:
+				percent = 0
 			row = frappe._dict({
 				"line_item": root.label,
 				"supplier_price": root.rate,
