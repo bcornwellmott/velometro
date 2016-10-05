@@ -1,0 +1,99 @@
+
+<head>
+	
+	
+	<link href="/assets/frappe/css/c3.min.css" rel="stylesheet" type="text/css">
+	
+	
+	<script type="text/javascript" src="/assets/frappe/js/lib/d3.min.js"></script>
+	<script type="text/javascript" src="/assets/frappe/js/lib/c3.min.js"></script>
+    <script type="text/javascript">
+
+		onReady("#chart_div", function() {
+			var chartData = [];
+			var labels = [];
+			var values = ["% Difference"];
+
+			{% for(var i=1, l=data.length+1; i<l; i++) { %}
+				labels[{%=i%}-1] = \"{%= data[i-1][report.columns[1].field] %} \";
+				values[{%=i%}] = {%= data[i-1][report.columns[5].field] %} ;	
+			{% } %}
+	
+			
+			chartData[0] = values;
+			console.log(chartData);
+			
+			hold = { bindto: "#chart_div" ,
+				data: {	
+						columns: chartData,
+						type: "bar"
+					},
+				axis:{
+					x: {
+						type: "category",
+						label: "Item Code and Quantity",
+						categories: labels
+					},
+					y: {
+						label: "Percent Difference (%)"
+					}
+				},
+				bar: {
+					width: {
+						ratio: 0.8
+						}
+					}
+				};
+
+			var chart = c3.generate(hold);
+		});
+		
+		function onReady(selector, callback) {
+        var intervalID = window.setInterval(function() {
+          if (document.querySelector(selector) !== undefined) {
+            window.clearInterval(intervalID);
+            callback.call(this);
+          }
+        }, 500);}
+		
+    </script>
+
+ </head>
+<div style="margin-bottom: 7px;" class="text-center">
+	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h3 class="text-center">{%= filters.supplier %} </h3>
+<h4 class="text-center">{%= filters.supplier_quotation %} </h4>
+
+<hr>
+
+
+<h4 class="text-center"> Analysis Chart </h4>
+<div id="chart_div"></div>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			{% for(var i=0, l=report.columns.length; i<l; i++) { %}
+				<th style="width: 15%">{%= report.columns[i].label %}</th>
+			{% } %}
+
+		</tr>
+	</thead>
+	<tbody>
+
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+			
+				{% for(var j=0,m=report.columns.length; j<m; j++) { %}
+					<td style="width: 15%">{%= data[i][report.columns[j].field] %}</td>
+				{% } %}
+
+		</tr>
+		{% } %}
+	</tbody>
+</table>
+
+		
+<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
