@@ -43,5 +43,13 @@ frappe.query_reports["Supplier Quotation Analysis"] = {
 				}
 				
 			}
+	},{
+		"fieldname":"sourced_check",
+		"label": __("Compare to Sourced Supplier"),
+		"fieldtype": "Check",
+		"options": "",
+		"default": 1,
+		
+		
 	}]
 }
