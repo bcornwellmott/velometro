@@ -1,0 +1,18 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2016-10-04 16:20:07.070719", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2016-10-04 16:20:09.289046", 
+ "modified_by": "Administrator", 
+ "module": "Velometro", 
+ "name": "Supplier Quotation Analysis", 
+ "owner": "Administrator", 
+ "ref_doctype": "Supplier Quotation", 
+ "report_name": "Supplier Quotation Analysis", 
+ "report_type": "Script Report"
+}
