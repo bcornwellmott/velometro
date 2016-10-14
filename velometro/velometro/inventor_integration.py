@@ -64,14 +64,14 @@ def get_tool_tags():
 @frappe.whitelist()
 def get_affected_boms(item_code):
 	bom_list = []
-	for d in frappe.db.sql("""select bom.name from `tabBOM` bom, `tabBOM Item` fbi, `tabItem` item where bom.name = fbi.parent and bom.is_active = 1 and fbi.item_code = item.item_code and  item.variant_of  = %(item_code)s""",{"item_code":item_code}, as_dict=1):
+	for d in frappe.db.sql("""select bom.name from `tabBOM` bom, `tabBOM Item` fbi, `tabItem` item where bom.name = fbi.parent and bom.is_default = 1 and fbi.item_code = item.item_code and  item.variant_of  = %(item_code)s""",{"item_code":item_code}, as_dict=1):
 		bom_list.append(d.name)
 	return bom_list
 	
 @frappe.whitelist()
 def get_affected_parent_boms(bom_no):
 	bom_list = []
-	for d in frappe.db.sql("""select distinct bom.name from `tabBOM` bom, `tabBOM Item` fbi where bom.name = fbi.parent and bom.is_active = 1 and fbi.bom_no = %(bom_no)s""",{"bom_no":bom_no}, as_dict=1):
+	for d in frappe.db.sql("""select distinct bom.name from `tabBOM` bom, `tabBOM Item` fbi where bom.name = fbi.parent and bom.is_default = 1 and fbi.bom_no = %(bom_no)s""",{"bom_no":bom_no}, as_dict=1):
 		bom_list.append(d.name)
 		for level_up in get_affected_parent_boms(d.name):
 			if level_up not in bom_list:
