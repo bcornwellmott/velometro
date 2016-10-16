@@ -34,5 +34,14 @@
   "name": "Item-Client", 
   "script": "frappe.ui.form.on(\"Item\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Copy Pricing from Previous Revision\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.supplier_quotation.copy_pricing_rule_from_previous_revision\",\n\t\t\targs: {\n\t\t\t\t\"base_item_code\": cur_frm.doc.variant_of,\n\t\t\t\t\"current_rev\": cur_frm.doc.attributes[0].attribute_value\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});", 
   "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "BOM", 
+  "modified": "2016-10-16 12:03:13.620505", 
+  "name": "BOM-Client", 
+  "script": "frappe.ui.form.on(\"BOM\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Check all BOMs\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.bom.check_boms\",\n\t\t\targs: {\n\t\t\t\tbom_name: cur_frm.doc.name,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\t\n\n\t\t\t}\n\t\t});\n});\nfrm.add_custom_button(__(\"Update BOM\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.bom.update_bom\",\n\t\t\targs: {\n\t\t\t\tbom_name: cur_frm.doc.name,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc()\n\n\t\t\t}\n\t\t});\n});\n\t}\n});\n", 
+  "script_type": "Client"
  }
 ]
