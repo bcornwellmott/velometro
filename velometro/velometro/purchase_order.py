@@ -53,6 +53,8 @@ def attach_all_docs(document):
 				myFile = save_url(attach, document2.doctype, document2.name, "Home/Attachments")
 				myFile.file_name = attach
 				myFile.save()
+				current_attachments.append(attach)
+				
 	frappe.msgprint("Attached {0} files".format(count))
 		
 def add_bom_items(items, item_code):
