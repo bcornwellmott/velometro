@@ -8,14 +8,14 @@ frappe.ui.form.on('BOM Quote', {
 	},
 	refresh: function(frm) {
 		if (frm.doc.master_bom){
-			frm.set_df_property("master_bom", "read_only", 1);
+			frm.set_df_property("master_bom", "read_only", 1); 
 		}
 	} 
 });
 
 
 frappe.ui.form.on('BOM Quote', "load_bom_button", function(frm){
-	console.log(frm.doc);
+	
 	frm.call({
 		'method': 'load_bom',
 		'doc':frm.doc,		
