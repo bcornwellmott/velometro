@@ -14,44 +14,19 @@ frappe.ui.form.on('BOM Quote', {
 });
 
 
-frappe.ui.form.on('BOM Quote', "master_bom", function(frm){
-	/*console.log("TEST")
-	erpnext.utils.map_current_doc({
-		method: "velometro.velometro.doctype.bom_quote.bom_quote.load_bom",
-		frm: cur_frm,
-		source_name: frm.doc.master_bom
-	});
-	cur_frm.reload_doc();
+frappe.ui.form.on('BOM Quote', "load_bom_button", function(frm){
+	console.log(frm.doc);
 	frm.call({
-		'method': 'frappe.client.get',
-		'args': {
-			 'doctype': 'BOM',
-          		'name':frm.doc.master_bom			
-		},
-		'callback': function(item) {
-
-			frappe.model.set_value(frm.doctype,frm.docname,"master_item",item.message.item);
-			frm.call({
-				'method': 'frappe.client.get',
-				'args': {
-				 'doctype': 'Item',
-        		  		'name':item.message.item				
-				},	
-				'callback': function(item) {
-					frappe.model.set_value(cur_frm.doctype,cur_frm.docname,"item_description",item.message.description);
-					
-		
-				}
-		});
-
-
+		'method': 'load_bom',
+		'doc':frm.doc,		
+		'callback': function() {
+			frm.reload_doc();
 		}
-	});*/
+	});
 	 frm.set_df_property("master_bom", "read_only", 1);
+	 frm.set_df_property("quantity", "read_only", 1);
+	 frm.set_df_property("load_bom_button", "hidden", 1);
 
-
-	
- 
 });
 
 
