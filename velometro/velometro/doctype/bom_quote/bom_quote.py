@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
+import bisect
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc 
 from frappe.model.meta import get_field_currency
@@ -18,7 +19,11 @@ class BOMQuote(Document):
 	# Go through each item in this BOM
 
 	def validate(self):
-		self.update_item_prices()
+		
+		if len(self.items) == 0:
+			self.load_bom()
+		else:
+			self.update_item_prices()
 		
 	def update_item_prices(self):
 		unit_pcost = 0 
@@ -55,7 +60,7 @@ class BOMQuote(Document):
 		self.assembly_cost = unit_acost
 		
 		self.purchased_cost = unit_pcost
-		self.unit_cost = self.purchased_cost + self.assembly_cost 
+		self.unit_cost = self.purchased_cost + self.assembly_cost  
 		self.total_cost = self.quantity * self.unit_cost 
 
 	
@@ -65,7 +70,30 @@ class BOMQuote(Document):
 		if not hasattr(self,"operations"):
 			self.operations = []
 		add_bom_level(self, 1, self.master_bom)
+		
+		#Sort by item code and reassign idx
+		self.items.sort(key=getKey)
+		idx = 1
+		for itm in self.items:
+			itm.idx = idx
+			itm.parent = self.name
+			itm.parenttype = "BOM Quote"
+			idx += 1
+			
+		#Sort by bom_no and reassign idx
+		self.operations.sort( key=getKey)
+		idx = 1
+		for itm in self.operations:
+			itm.idx = idx
+			itm.parent = self.name
+			itm.parenttype = "BOM Quote"
+			idx += 1
 		self.update_item_prices()
+		
+	
+def getKey(item):
+	return item.sort_name
+
 	
 def add_bom_level(doc, qty, bom):
 	# Get the BOM doc
@@ -89,11 +117,12 @@ def add_bom_level(doc, qty, bom):
 			#frappe.msgprint("Getting BOM for" + bom)
 			new_purchased = get_purchase_item(myItem.item_code, item_quantity)
 			new_purchased.idx = len(doc.items)+1
-			doc.items.append(new_purchased)		
+			bisect.insort_left(doc.items,new_purchased)		
 			
 def get_purchase_item(item_code,qty):
 	doc = frappe.new_doc("BOM Costing Purchased Item") 
-	doc.item = item_code 
+	doc.item = item_code
+	doc.sort_name = item_code.lower()
 	doc.supplier = frappe.get_value("Item",doc.item,"default_supplier")
 	doc.price_list =  frappe.get_value("Item",doc.item,"default_supplier")
 	doc.currency = frappe.get_value("Supplier", doc.supplier,"default_currency") 
@@ -118,9 +147,11 @@ def get_bom_operation(bom, qty):
 	
 	doc = frappe.new_doc("BOM Costing Operations") 
 	doc.minutes = atime
+	
 	doc.num_operators = num_operators
 	doc.total_cost = cost * qty
 	doc.bom = bom_doc.name 
+	doc.sort_name = bom.lower()
 	doc.operations = ", ".join(filter(None, operations))
 	doc.idx = None
 	return doc
@@ -148,12 +179,12 @@ def get_item_price(item, company):
 	pr_price = 0		
 	pr_result = get_pricing_rule_for_item(args) 
 	if pr_result.pricing_rule:
-		frappe.msgprint("Found pricing rule for " + item.item + ": " + pr_result.pricing_rule)
+		#frappe.msgprint("Found pricing rule for " + item.item + ": " + pr_result.pricing_rule)
 		pricing_rule = frappe.get_doc("Pricing Rule", pr_result.pricing_rule)
 		pr_price = pricing_rule.price 
 	else:
 		#Need to find the item price
-		frappe.msgprint("Could not find pricing rule for " + item.item )
+		#frappe.msgprint("Could not find pricing rule for " + item.item )
 		pr_price = frappe.db.get_value("Item Price", {"price_list": item.price_list,"item_code": item.item}, "price_list_rate") or 0
 	return pr_price 
 	
