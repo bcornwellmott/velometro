@@ -39,6 +39,7 @@ def get_hours(employee, fiscal_year):
 
 	m = get_month_details(fiscal_year, 1)
 	start_date = m['month_start_date']
+	current_date = frappe.utils.getdate(frappe.utils.nowdate())
 
 	for timesheet_hrs in frappe.db.sql("""select detail.hours as hours, detail.activity_type as type from `tabTimesheet Detail` as detail, `tabTimesheet` as sheet where detail.from_time < %(start_time)s and detail.parent = sheet.name and sheet.docstatus = 1 and sheet.employee = %(employee)s""", {"employee": employee, "start_time":start_date}, as_dict=1):
 		prev_total_hrs += timesheet_hrs.hours
@@ -56,13 +57,13 @@ def get_hours(employee, fiscal_year):
 	joining_date = frappe.db.get_value("Employee", employee,["date_of_joining"])
 	holidays = get_holidays_for_employee(employee, joining_date, start_date)
 	if start_date >= joining_date:
-		working_days = date_diff(start_date, joining_date) + 1 - len(holidays)
+		working_days = date_diff(start_date, joining_date) - len(holidays)
 	else:
 		working_days = 0
 	prev_ot_hrs = prev_total_hrs - 8 * working_days
-	if prev_ot_hrs < 0:
-		prev_ot_hrs = 0	
-	prev_ot_hrs -= prev_lieu_hrs	
+	#if prev_ot_hrs < 0:
+	#	prev_ot_hrs = 0	
+	#prev_ot_hrs -= prev_lieu_hrs	
 		
 				
 	row = frappe._dict({
@@ -87,7 +88,6 @@ def get_hours(employee, fiscal_year):
 		m = get_month_details(fiscal_year, index+1)
 		start_date = m['month_start_date']
 		end_date = m['month_end_date']
-		
 		for timesheet_hrs in frappe.db.sql("""SELECT detail.hours as hours, detail.activity_type as type 
 			FROM `tabTimesheet Detail` as detail, `tabTimesheet` as sheet 
 			WHERE cast(detail.from_time as date) BETWEEN %(start_time)s AND %(end_time)s AND 
@@ -112,11 +112,22 @@ def get_hours(employee, fiscal_year):
 				ytd_total -= timesheet_hrs.hours
 				
 		#Get the hours in each month you're supposed to work
-		holidays = get_holidays_for_employee(employee, start_date, end_date)
-		working_days = date_diff(end_date, start_date) + 1 - len(holidays)
+		if end_date > current_date:
+			end_date = current_date
+		if end_date > start_date:
+			holidays = get_holidays_for_employee(employee, start_date, end_date)
+			if start_date >= joining_date:
+				working_days = date_diff(end_date, start_date) + 1 - len(holidays)
+			elif end_date >= joining_date:
+				working_days = date_diff(end_date, joining_date) + 1 - len(holidays)
+			else:
+				working_days = 0
+		else:
+			working_days = 0
+
 		ot_hrs = total_hrs - 8 * working_days 
-		if ot_hrs < 0:
-			ot_hrs = 0
+		#if ot_hrs < 0:
+		#	ot_hrs = 0
 		#ot_hrs -= lieu_hrs
 		
 		ytd_ot += ot_hrs 
