@@ -55,7 +55,10 @@ def get_hours(employee, fiscal_year):
 	#Get the starting value working days
 	joining_date = frappe.db.get_value("Employee", employee,["date_of_joining"])
 	holidays = get_holidays_for_employee(employee, joining_date, start_date)
-	working_days = date_diff(start_date, joining_date) + 1 - len(holidays)
+	if start_date >= joining_date:
+		working_days = date_diff(start_date, joining_date) + 1 - len(holidays)
+	else:
+		working_days = 0
 	prev_ot_hrs = prev_total_hrs - 8 * working_days
 	if prev_ot_hrs < 0:
 		prev_ot_hrs = 0	
@@ -114,7 +117,7 @@ def get_hours(employee, fiscal_year):
 		ot_hrs = total_hrs - 8 * working_days 
 		if ot_hrs < 0:
 			ot_hrs = 0
-		ot_hrs -= lieu_hrs
+		#ot_hrs -= lieu_hrs
 		
 		ytd_ot += ot_hrs 
 		row = frappe._dict({
