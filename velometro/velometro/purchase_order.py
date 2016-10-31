@@ -50,7 +50,7 @@ def attach_all_docs(document):
 			# Check to see if this file is attached to the one we are looking for
 			if not attach in current_attachments:
 				count = count + 1
-				myFile = save_url(attach, document2.doctype, document2.name, "Home/Attachments")
+				myFile = save_url(attach, attach, document2.doctype, document2.name, "Home/Attachments")
 				myFile.file_name = attach
 				myFile.save()
 				current_attachments.append(attach)
