@@ -45,6 +45,8 @@ def attach_all_docs(document):
 			attachments.append(item.dxf_attachment)
 		if item.x_t_attachment:
 			attachments.append(item.x_t_attachment)
+		if item.electrical_attachment:
+			attachments.append(item.electrical_attachment)
 			
 		for attach in attachments:
 			# Check to see if this file is attached to the one we are looking for
