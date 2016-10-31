@@ -24,7 +24,7 @@ frappe.query_reports["Supplier Quotation Analysis"] = {
 		"default": "",
 		"reqd": 1,
 		"get_query": function() {
-				var quote = frappe.query_report.filters_by_name.supplier.get_value();
+				var quote = frappe.query_report_filters_by_name.supplier.get_value();
 				if (quote != "")
 				{
 					return {
