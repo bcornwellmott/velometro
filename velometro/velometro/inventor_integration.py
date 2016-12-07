@@ -73,7 +73,7 @@ def get_affected_parent_boms(bom_no):
 	bom_list = []
 	for d in frappe.db.sql("""select distinct bom.name from `tabBOM` bom, `tabBOM Item` fbi where bom.name = fbi.parent and bom.is_default = 1 and fbi.bom_no = %(bom_no)s""",{"bom_no":bom_no}, as_dict=1):
 		bom_list.append(d.name)
-		for level_up in get_affected_parent_boms(d.name):
-			if level_up not in bom_list:
-				bom_list.append(level_up)
+		#for level_up in get_affected_parent_boms(d.name):
+		#if level_up not in bom_list:
+		#bom_list.append(level_up)
 	return bom_list
