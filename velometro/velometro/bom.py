@@ -8,7 +8,7 @@ from frappe.utils import flt
 @frappe.whitelist()
 def check_boms(bom_name):
 	# This is where we check to see if the children of this bom have BOMs that are not the default
-	
+	frappe.msgprint("Start checking " + str(bom_name))
 	bom = frappe.get_doc("BOM",bom_name)
 	
 	for item in bom.items:
@@ -27,7 +27,7 @@ def check_boms(bom_name):
 			bom_no = frappe.get_value("Item",item.item_code, "default_bom")
 			if bom_no != None and bom_no != "":
 				frappe.msgprint(item.item_code+ " is missing its default BOM. Not checking children of this item.")
-	frappe.msgprint("Finished checking BOM of " + str(bom_name))
+	frappe.msgprint("Finished checking " + str(bom_name))
 
 @frappe.whitelist()
 def check_all_variants(item_base):
