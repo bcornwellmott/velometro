@@ -12,8 +12,13 @@ def check_boms(bom_name):
 	bom = frappe.get_doc("BOM",bom_name)
 	
 	for item in bom.items:
+		item_base = frappe.get_value("Item",item.item_code, "variant_of")
+		
+		if check_all_variants(item_base):
+			frappe.msgprint(item.item_code+ " has unreleased versions.")
 		if item.bom_no:
 			status = frappe.get_value("BOM",item.bom_no, "is_default")
+			
 			if status != 1:
 				frappe.msgprint(item.bom_no + " is out of date. Not checking children of this BOM")
 			else:
@@ -23,7 +28,17 @@ def check_boms(bom_name):
 			if bom_no != None and bom_no != "":
 				frappe.msgprint(item.item_code+ " is missing its default BOM. Not checking children of this item.")
 	frappe.msgprint("Finished checking BOMs")
+
+@frappe.whitelist()
+def check_all_variants(item_base):
+	# This is where we find all variants of the part and make sure none are In Design (not Released or Obsolete)
+	item_list = frappe.get_list('Item', fields=["name", "revision_status"], filters={'variant_of': item_base, 'disabled': 0})
 	
+	for my_item in item_list:
+		if my_item.revision_status != "Released" and my_item.revision_status != "Obsolete":
+			return 1
+	return 0
+
 @frappe.whitelist()			
 def update_bom(bom_name):
 	# This is where we try to update the boms to the default ones (for unsubmitted BOM
