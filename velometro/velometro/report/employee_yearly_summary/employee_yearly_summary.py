@@ -68,6 +68,7 @@ def get_hours(employee, fiscal_year):
 				
 	row = frappe._dict({
 		"month": "START OF YEAR",
+		"working_days": 0,
 		"total_hours": prev_total_hrs,
 		"vacation_hours": prev_vacation_hrs,
 		"sick_hours": prev_sick_hrs,
@@ -133,6 +134,7 @@ def get_hours(employee, fiscal_year):
 		ytd_ot += ot_hrs 
 		row = frappe._dict({
 				"month": month,
+				"working_days": working_days,
 				"total_hours": total_hrs,
 				"vacation_hours": vacation_hrs,
 				"sick_hours": sick_hrs,
@@ -143,6 +145,7 @@ def get_hours(employee, fiscal_year):
 		out.append(row)
 	row = frappe._dict({
 		"month": "YEAR TO DATE",
+		"working_days": 0,
 		"total_hours": ytd_total,
 		"vacation_hours": ytd_vacation,
 		"sick_hours": ytd_sick,
@@ -154,6 +157,7 @@ def get_hours(employee, fiscal_year):
 	row = frappe._dict({
 		"month": "GRAND TOTAL",
 		"total_hours": ytd_total + prev_total_hrs,
+		"working_days": 0,
 		"vacation_hours": ytd_vacation + prev_vacation_hrs,
 		"sick_hours": ytd_sick + prev_sick_hrs,
 		"statutory_hours": ytd_stat + prev_stat_hrs,
@@ -169,6 +173,12 @@ def get_columns():
 		"fieldname": "month",
 		"label": "Month",
 		"fieldtype": "Data",
+		"options": "",
+		"width": 120
+	}, {
+		"fieldname": "working_days",
+		"label": "Working Days",
+		"fieldtype": "Float",
 		"options": "",
 		"width": 120
 	}, {
