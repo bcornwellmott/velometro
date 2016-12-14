@@ -15,18 +15,18 @@ def check_boms(bom_name):
 		item_base = frappe.get_value("Item",item.item_code, "variant_of")
 		
 		if check_all_variants(item_base):
-			frappe.msgprint(item.item_code+ " has unreleased versions.")
+			frappe.msgprint("** " + item.item_code+ " has unreleased versions **")
 		if item.bom_no:
 			status = frappe.get_value("BOM",item.bom_no, "is_default")
 			
 			if status != 1:
-				frappe.msgprint(item.bom_no + " is out of date. Not checking children of this BOM")
+				frappe.msgprint('** ' + item.bom_no + " is out of date. Not checking children of this BOM **")
 			else:
 				check_boms(item.bom_no)
 		else:
 			bom_no = frappe.get_value("Item",item.item_code, "default_bom")
 			if bom_no != None and bom_no != "":
-				frappe.msgprint(item.item_code+ " is missing its default BOM. Not checking children of this item.")
+				frappe.msgprint('** ' + item.item_code+ " is missing its default BOM. Not checking children of this item. **")
 	frappe.msgprint("Finished checking " + str(bom_name))
 
 @frappe.whitelist()
