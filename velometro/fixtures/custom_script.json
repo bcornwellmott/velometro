@@ -30,9 +30,9 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Item", 
-  "modified": "2016-12-14 10:50:57.595398", 
+  "modified": "2017-01-04 11:00:20.309681", 
   "name": "Item-Client", 
-  "script": "frappe.ui.form.on(\"Item\",{\n\trefresh: function(frm) {\nfrm.fields_dict.attributes.grid.toggle_enable(\"attribute_value\", 1);\nfrm.add_custom_button(__(\"Copy Pricing from Previous Revision\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.supplier_quotation.copy_pricing_rule_from_previous_revision\",\n\t\t\targs: {\n\t\t\t\t\"base_item_code\": cur_frm.doc.variant_of,\n\t\t\t\t\"current_rev\": cur_frm.doc.attributes[0].attribute_value\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});", 
+  "script": "frappe.ui.form.on(\"Item\",{\n\trefresh: function(frm) {\n\t\tfrm.fields_dict.attributes.grid.toggle_enable(\"attribute_value\", 1);\n\t\n\t\tfrm.add_custom_button(__(\"Copy Pricing from Previous Revision\"), function(foo) {\n\t\t\tfrappe.call({\n\t\t\t\tmethod:\"velometro.velometro.supplier_quotation.copy_pricing_rule_from_previous_revision\",\n\t\t\t\targs: {\n\t\t\t\t\t\"base_item_code\": cur_frm.doc.variant_of,\n\t\t\t\t\t\"current_rev\": cur_frm.doc.attributes[0].attribute_value\n\t\t\t\t}, \n\t\t\t\tcallback: function(r) { \n\t\t\t\t\tfrm.reload_doc();\n\n\t\t\t\t}\n\t\t\t});\n\t\t});\n\t\t\n\t\tfrm.add_custom_button(__(\"Find Parent BOMs\"), function(foo) {\n\t\t\t\n\t\t\tfrappe.route_options = {'item_code': ['=', cur_frm.doc.item_code]};\n\t\t\t//if(show_open) {\n\t\t\t//\t$.extend(frappe.route_options, frappe.ui.notifications.get_filters(doctype));\n\t\t\t//}\n\t\t\tfrappe.set_route(\"List\", 'BOM');\n\t\t});\n\t}\n});", 
   "script_type": "Client"
  }, 
  {
