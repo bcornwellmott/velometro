@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
-from frappe.utils import flt
+from frappe.utils import flt, cint
 import frappe
 
 def execute(filters=None):
@@ -32,6 +32,7 @@ def get_min_item_list(quote, qty_list, mask):
 		low_supplier = []
 		company = frappe.db.get_default("company")
 		company_currency = frappe.db.get_default("currency")
+		float_precision = cint(frappe.db.get_default("float_precision")) or 2
 		# Get the default supplier of suppliers
 
 			
@@ -49,14 +50,14 @@ def get_min_item_list(quote, qty_list, mask):
 					if iprice.price == 0:
 						percent = 100
 					else:
-						percent = flt(100*(root.rate - iprice.price * exg) / iprice.price)
+						percent = flt(100*(root.rate - iprice.price * exg) / iprice.price, float_precision)
 				else:
 					exg = 1
 					percent = 0
 				row = frappe._dict({
 					"line_item": root.label,
-					"supplier_price": root.rate,
-					"lowest_price": iprice.price * exg,
+					"supplier_price": flt(root.rate, float_precision),
+					"lowest_price": flt(iprice.price * exg, float_precision),
 					"lowest_supplier": iprice.supplier,
 					"percent_diff": percent
 				})
@@ -75,6 +76,7 @@ def get_item_list(quote, qty_list, mask):
 		low_supplier = []
 		company = frappe.db.get_default("company")
 		company_currency = frappe.db.get_default("currency")
+		float_precision = cint(frappe.db.get_default("float_precision")) or 2
 		# Get the default supplier of suppliers
 
 			
@@ -87,13 +89,13 @@ def get_item_list(quote, qty_list, mask):
 				
 			exg = get_exchange_rate(supplier_currency,company_currency) or 1
 			if price:
-				percent = flt(100*(root.rate - price * exg) / price)
+				percent = flt(100*(root.rate - price * exg) / price, float_precision)
 			else:
 				percent = 0
 			row = frappe._dict({
 				"line_item": root.label,
-				"supplier_price": root.rate,
-				"lowest_price": price * exg,
+				"supplier_price": flt(root.rate, float_precision),
+				"lowest_price": flt(price * exg, float_precision),
 				"lowest_supplier": root.supplier,
 				"percent_diff": percent
 			})
