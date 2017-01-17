@@ -12,18 +12,18 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Purchase Order", 
-  "modified": "2016-09-28 08:07:45.494457", 
+  "modified": "2017-01-16 21:26:06.847555", 
   "name": "Purchase Order-Client", 
-  "script": "frappe.ui.form.on(\"Purchase Order\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Load Attachments\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.attach_all_docs\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});\n\nfrappe.ui.form.on(\"Purchase Order\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Create ZIP\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.zip_attachments\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});", 
+  "script": "frappe.ui.form.on(\"Purchase Order\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Load Attachments\"), function(foo) {\n\t\tif(cur_frm.doc.docstatus == 0){\n\t\t\tfrm.save();\n\t\t}\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.attach_all_docs\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});\n\nfrappe.ui.form.on(\"Purchase Order\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Create ZIP\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.zip_attachments\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});", 
   "script_type": "Client"
  }, 
  {
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Request for Quotation", 
-  "modified": "2016-10-20 16:03:17.920440", 
+  "modified": "2017-01-16 21:26:01.838812", 
   "name": "Request for Quotation-Client", 
-  "script": "frappe.ui.form.on(\"Request for Quotation\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Load Attachments\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.attach_all_docs\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});\n\nfrappe.ui.form.on(\"Request for Quotation\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Create ZIP\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.zip_attachments\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});", 
+  "script": "frappe.ui.form.on(\"Request for Quotation\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Load Attachments\"), function(foo) {\n\t\tif(cur_frm.doc.docstatus == 0){\n\t\t\tfrm.save();\n\t\t}\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.attach_all_docs\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});\n\nfrappe.ui.form.on(\"Request for Quotation\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Create ZIP\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.purchase_order.zip_attachments\",\n\t\t\targs: {\n\t\t\t\tdocument: cur_frm.doc\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc();\n\n\t\t\t}\n\t\t});\n});\n\t}\n});", 
   "script_type": "Client"
  }, 
  {
