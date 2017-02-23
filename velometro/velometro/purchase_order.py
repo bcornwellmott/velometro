@@ -4,10 +4,30 @@ import frappe
 import os, base64
 from frappe import _, throw
 from frappe.utils import flt
-from frappe.utils.file_manager import save_url, save_file, get_file_name
+from frappe.utils.file_manager import save_url, save_file, get_file_name, remove_all, remove_file
 from frappe.utils import get_site_path, get_files_path, random_string, encode
 import json
 
+
+@frappe.whitelist()
+def remove_all_docs(document):
+	"""This function attaches drawings to the purchase order based on the items being ordered"""
+	document = json.loads(document)
+	document2 = frappe._dict(document)
+	
+	remove_all(document2.doctype, document2.name)
+
+@frappe.whitelist()
+def remove_non_zip_docs(document):
+	"""This function attaches drawings to the purchase order based on the items being ordered"""
+	document = json.loads(document)
+	document2 = frappe._dict(document)
+	
+	current_attachments = []
+	
+	for file_url in frappe.db.sql("""select name, file_url from `tabFile` where attached_to_doctype = %(doctype)s and attached_to_name = %(docname)s""", {'doctype': document2.doctype, 'docname': document2.name}, as_dict=True ):
+		if not file_url.file_url.endswith(".zip"):
+			remove_file(file_url.name, document2.doctype, document2.name)
 
 @frappe.whitelist()
 def attach_all_docs(document):
