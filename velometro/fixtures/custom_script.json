@@ -43,5 +43,14 @@
   "name": "BOM-Client", 
   "script": "frappe.ui.form.on(\"BOM\",{\n\trefresh: function(frm) {\nfrm.add_custom_button(__(\"Check all BOMs\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.bom.check_boms\",\n\t\t\targs: {\n\t\t\t\tbom_name: cur_frm.doc.name,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\t\n\n\t\t\t}\n\t\t});\n});\nfrm.add_custom_button(__(\"Update BOM\"), function(foo) {\n\n\t\tfrappe.call({\n\t\t\tmethod:\"velometro.velometro.bom.update_bom\",\n\t\t\targs: {\n\t\t\t\tbom_name: cur_frm.doc.name,\n\t\t\t\t\n\t\t\t}, \n\t\t\tcallback: function(r) { \n\t\t\t\tfrm.reload_doc()\n\n\t\t\t}\n\t\t});\n});\n\t}\n});\n", 
   "script_type": "Client"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Script", 
+  "dt": "Timesheet", 
+  "modified": "2017-03-08 13:03:33.608366", 
+  "name": "Timesheet-Client", 
+  "script": "frappe.ui.form.on(\"Timesheet\",{\n\trefresh: function(frm) {\n\t\tif(cur_frm.doc.docstatus == 0) {\n\t\t\tfrm.add_custom_button(__(\"Add Next Day\"), function(foo) {\n\t\t\t\t\tvar index = frm.doc.time_logs.length - 1;\n\t\t\t\t\tif (index >= 0)\n\t\t\t\t\t{\n\t\t\t\t\t\tfrm.doc.time_logs[index]\n\t\t\t\t\t\t\n\t\t\t\t\t\tfrm.add_child(\"time_logs\");\n\t\t\t\t\t\t\n\t\t\t\t\t\tvar startFirstDay = new Date(frm.doc.time_logs[index].from_time);\n\t\t\t\t\t\tvar startNextDay = new Date();\n\t\t\t\t\t\tstartNextDay.setTime(startFirstDay.getTime() + 1000*60*60*24);\n\t\t\t\t\t\t\n\t\t\t\t\t\tvar endFirstDay = new Date(frm.doc.time_logs[index].to_time);\n\t\t\t\t\t\tvar endNextDay = new Date();\n\t\t\t\t\t\tendNextDay.setTime(endFirstDay.getTime() + 1000*60*60*24);\n\n\t\t\t\t\t\tfrm.doc.time_logs[index+1].activity_type = frm.doc.time_logs[index].activity_type;\n\t\t\t\t\t\tfrm.doc.time_logs[index+1].from_time =  startNextDay;\n\t\t\t\t\t\tfrm.doc.time_logs[index+1].to_time = endNextDay;\n\t\t\t\t\t\tfrm.doc.time_logs[index+1].hours = frm.doc.time_logs[index].hours;\n\t\t\t\t\t\tfrm.refresh_field(\"time_logs\");\n\t\t\t\t\t}\n\t\t\t});\n\t\t}\n\n\t\t\n\t\t\n\t}\n});", 
+  "script_type": "Client"
  }
 ]
