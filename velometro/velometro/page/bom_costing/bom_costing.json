@@ -1,0 +1,22 @@
+{
+ "content": null, 
+ "creation": "2017-02-27 09:22:18.191337", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2017-02-27 09:22:20.254957", 
+ "modified_by": "Administrator", 
+ "module": "Velometro", 
+ "name": "bom-costing", 
+ "owner": "Administrator", 
+ "page_name": "BOM Costing", 
+ "roles": [
+  {
+   "role": "Maintenance Manager"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "title": "BOM Costing"
+}
