@@ -197,8 +197,8 @@ erpnext.BOMCosting = frappe.views.GridReport.extend({
 				input = me.page.add_select(v.label, v.options || [v.default_value]);
 			} else if(v.fieldtype=="Link") {
 				input = me.page.add_data(v.label);
-				new Awesomplete(input.get(0), {
-					list: v.list || []
+				input.autocomplete({
+					source: v.list || [],
 				});
 			} else if(v.fieldtype==='Button' && v.label===__("Refresh")) {
 				input = me.page.set_primary_action(v.label, null, v.icon);
