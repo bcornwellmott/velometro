@@ -99,7 +99,7 @@ erpnext.BOMCosting = frappe.views.GridReport.extend({
 				};
 			var me = this;
 			frappe.call({
-				method: "erpnext.manufacturing.page.bom_costing.bom_costing.solve_bom_cost",
+				method: "velometro.velometro..page.bom_costing.bom_costing.solve_bom_cost",
 				args: opts,
 				freeze: true,
 				callback: function(r) {

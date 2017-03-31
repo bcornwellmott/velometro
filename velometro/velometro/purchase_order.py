@@ -78,7 +78,50 @@ def attach_all_docs(document):
 				current_attachments.append(attach)
 				
 	frappe.msgprint("Attached {0} files".format(count))
+
+@frappe.whitelist()
+def attach_all_boms(document):
+	"""This function attaches drawings to the purchase order based on the items being ordered"""
+	document = json.loads(document)
+	document2 = frappe._dict(document)
+	
+	current_attachments = []
+	
+	for file_url in frappe.db.sql("""select file_name from `tabFile` where attached_to_doctype = %(doctype)s and attached_to_name = %(docname)s""", {'doctype': document2.doctype, 'docname': document2.name}, as_dict=True ):
+		current_attachments.append(file_url.file_name)
+	
+	# add the directly linked drawings
+	boms = []
+	for item in document["items"]:
+		#add the boms
+		boms = get_bom_pdf(boms, item["item_code"])
+	
+	count = 0
+	for bom_doc in boms:
+		#frappe.msgprint(item_doc)
+		bom = frappe.get_doc("BOM",bom_doc)
 		
+		# Check to see if this file is attached to the one we are looking for
+		if not (bom.name + ".pdf") in current_attachments:
+			count = count + 1
+			my_attach = frappe.attach_print(bom.doctype, bom.name, doc=bom)
+			myFile = save_file(my_attach['fname'], my_attach['fcontent'], document2.doctype, document2.name, "Home/Attachments",False,1)
+			myFile.file_name = my_attach['fname']
+			myFile.save()
+			current_attachments.append(my_attach['fname'])
+				
+	frappe.msgprint("Attached {0} boms".format(count))
+	
+def get_bom_pdf(boms, item_code):	
+	bom_num = frappe.get_value("Item",item_code, "default_bom")
+	if bom_num:
+		boms.append(bom_num)
+		bom = frappe.get_doc("BOM",bom_num)
+		for bom_item in bom.items:
+			boms = get_bom_pdf(boms, bom_item.item_code)
+	return boms
+
+	
 def add_bom_items(items, item_code):
 	bom_num = frappe.get_value("Item",item_code, "default_bom")
 	if bom_num:

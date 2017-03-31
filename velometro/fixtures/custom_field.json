@@ -1,6 +1,7 @@
 [
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -36,6 +37,7 @@
  }, 
  {
   "allow_on_submit": 1, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": "Update BOM Cost", 
@@ -71,6 +73,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -106,6 +109,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -141,6 +145,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -176,6 +181,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -211,6 +217,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -246,6 +253,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -281,6 +289,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 1, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -316,6 +325,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": "1", 
@@ -351,6 +361,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": "1", 
@@ -386,6 +397,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -421,6 +433,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
@@ -456,6 +469,7 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "bold": 0, 
   "collapsible": 0, 
   "collapsible_depends_on": null, 
   "default": null, 
