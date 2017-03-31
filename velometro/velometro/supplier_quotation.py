@@ -28,7 +28,6 @@ def add_pricing_rules(mquotation, method=None):
 			"transaction_type": "buying",
 			"supplier": quotation.supplier,
 			"qty": item_doc.qty,
-			"price_list": quotation.buying_price_list,
 			"company": quotation.company 
 		}
 
@@ -39,7 +38,7 @@ def add_pricing_rules(mquotation, method=None):
 		if not pr_result.pricing_rule:
 			frappe.msgprint(_("There are no pricing rules for this item"))
 			pr_title = item_doc.item_code + "-" + quotation.supplier + "-" + str(item_doc.qty)
-			new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": item_doc.qty, "apply_on": "Item Code", "item_code": item_doc.item_code, "priority": 1, "buying": "1", "applicable_for": "Supplier", "company": quotation.company, "price_or_discount": "Price", "price": item_doc.rate, "supplier": quotation.supplier, "for_price_list" : quotation.buying_price_list, "title": pr_title, "from_supplier_quotation": quotation.name })
+			new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": item_doc.qty, "apply_on": "Item Code", "item_code": item_doc.item_code, "priority": 1, "buying": "1", "applicable_for": "Supplier", "company": quotation.company, "price_or_discount": "Price", "price": item_doc.rate, "supplier": quotation.supplier, "title": pr_title, "from_supplier_quotation": quotation.name })
 			new_rule.insert()
 
 		else:
@@ -57,7 +56,7 @@ def add_pricing_rules(mquotation, method=None):
 				frappe.msgprint(_("Creating new rule and incrementing priority"))
 				# This rule is lower in qty than the current rule. We need to add a new pricing rule and update the priorities for each of the higher quantity pricing rules
 				pr_title = item_doc.item_code + "-" + quotation.supplier + "-" + str(item_doc.qty)
-				new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": item_doc.qty, "apply_on": "Item Code", "item_code": item_doc.item_code, "priority": pricing_rule.priority, "buying": "1", "applicable_for": "Supplier", "company": quotation.company, "price_or_discount": "Price", "price": item_doc.rate, "supplier": quotation.supplier, "for_price_list" : quotation.buying_price_list, "title": pr_title, "from_supplier_quotation": quotation.name })
+				new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": item_doc.qty, "apply_on": "Item Code", "item_code": item_doc.item_code, "priority": pricing_rule.priority, "buying": "1", "applicable_for": "Supplier", "company": quotation.company, "price_or_discount": "Price", "price": item_doc.rate, "supplier": quotation.supplier,  "title": pr_title, "from_supplier_quotation": quotation.name })
 				new_rule.insert()
 
 				# Run through each of the higher quantity pricing rules and increase their priority by one 
@@ -88,6 +87,6 @@ def copy_pricing_rule_from_previous_revision(base_item_code, current_rev):
 	for rule in pr_result:
 		frappe.msgprint("Copying rule: " + str(rule.name))
 		pr_title = new_code + "-" + rule.supplier + "-" + str(rule.min_qty)
-		new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": rule.min_qty, "apply_on": rule.apply_on, "item_code": new_code, "priority": rule.priority, "buying": rule.buying, "applicable_for": rule.applicable_for, "company": rule.company, "price_or_discount": rule.price_or_discount, "price": rule.price, "supplier": rule.supplier, "for_price_list" : rule.for_price_list, "title": pr_title, "from_supplier_quotation": rule.from_supplier_quotation })
+		new_rule = frappe.get_doc({"doctype":"Pricing Rule", "min_qty": rule.min_qty, "apply_on": rule.apply_on, "item_code": new_code, "priority": rule.priority, "buying": rule.buying, "applicable_for": rule.applicable_for, "company": rule.company, "price_or_discount": rule.price_or_discount, "price": rule.price, "supplier": rule.supplier,  "title": pr_title, "from_supplier_quotation": rule.from_supplier_quotation })
 		new_rule.insert()
 
