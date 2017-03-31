@@ -68,10 +68,10 @@ erpnext.BOMCosting = frappe.views.GridReport.extend({
 		
 		
 		this._super();
-		this.filter_inputs.primary_pricing.val('Item Valuation Rate');
+		/*this.filter_inputs.primary_pricing.val('Item Valuation Rate');
 		this.filter_inputs.secondary_pricing.val('Last Purchase Rate');
 		this.filter_inputs.quantity.val('1');
-		
+		*/
 		
 		
 		
@@ -99,7 +99,7 @@ erpnext.BOMCosting = frappe.views.GridReport.extend({
 				};
 			var me = this;
 			frappe.call({
-				method: "velometro.velometro..page.bom_costing.bom_costing.solve_bom_cost",
+				method: "velometro.velometro.page.bom_costing.bom_costing.solve_bom_cost",
 				args: opts,
 				freeze: true,
 				callback: function(r) {
@@ -114,9 +114,20 @@ erpnext.BOMCosting = frappe.views.GridReport.extend({
 	prepare_data: function() {
 		var me = this;
 
-		console.log("prepare_data");
 		this.data = [];
 		var me = this;
+		var totals_row = [];
+		totals_row.item_code = "TOTAL";
+		totals_row.qty = 1;
+		
+		totals_row.name = "TOTAL";
+		totals_row.bom_no = "";
+		totals_row.unit = "";
+		totals_row.checked = false;
+		totals_row.id = 0;
+		
+			
+		var total_price = 0;
 		$.each(this.raw_data, function(i, d) { 
 			var new_row = [];
 			new_row.item_code = d.item_code;
@@ -126,11 +137,16 @@ erpnext.BOMCosting = frappe.views.GridReport.extend({
 			new_row.bom_no = d.bom_no;
 			new_row.unit = d.uom;
 			new_row.checked = true;
-			new_row.id = i;
+			new_row.id = i+1;
 			var total =  d.qty * d.unit_cost;
 			new_row.sum_price = total;
+			total_price += total;
 			me.data.push(new_row);
 		});
+		totals_row.item_price = total_price;
+		var total = totals_row.qty * total_price;
+		totals_row.sum_price = total;
+		me.data.push(totals_row);
 		
 	},
 	prepare_data_view: function () {
@@ -172,7 +188,7 @@ erpnext.BOMCosting = frappe.views.GridReport.extend({
 				if (me.data[d.index].bom_no)
 				{
 					me.filter_inputs.bom.val(me.data[d.index].bom_no);
-					me.get_data_and_refresh();
+					//me.get_data_and_refresh();
 				}
 			}
 		};
