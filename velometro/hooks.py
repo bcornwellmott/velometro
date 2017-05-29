@@ -75,6 +75,9 @@ fixtures = ["Custom Field", "Custom Script"]
 # Hook on document methods and events
 
 doc_events = {
+	"Timesheet": {
+		"on_submit": "velometro.velometro.vacation.check_for_new_leave"
+	}
   
 }
 
