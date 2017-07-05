@@ -63,12 +63,16 @@ def check_for_new_leave(self, method):
 	frappe.clear_cache()
 	
 def create_leave(detail, employee, type):
+
+	emp = frappe.get_doc("Employee", employee)
+	approvers = [l.leave_approver for l in emp.get("leave_approvers")]
 	mydict = dict(doctype='Leave Application', 
 		naming_series='LAP/', 
 		leave_type=type, 
 		status='Open', 
 		from_date=getdate(detail.from_time), 
 		to_date=getdate(detail.to_time), 
+		leave_approver = approvers[0],
 		employee=employee,
 		total_leave_days=detail.hours/8.0)
 	my_leave = frappe.get_doc(mydict).insert()
