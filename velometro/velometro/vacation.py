@@ -69,7 +69,6 @@ def create_leave(detail, employee, type):
 		status='Open', 
 		from_date=getdate(detail.from_time), 
 		to_date=getdate(detail.to_time), 
-		leave_approver='kbaker@velometro.com', 
 		employee=employee,
 		total_leave_days=detail.hours/8.0)
 	my_leave = frappe.get_doc(mydict).insert()
