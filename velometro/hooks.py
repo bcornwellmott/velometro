@@ -56,7 +56,7 @@ app_license = "MIT"
 
 # Fixtures
 # --------
-fixtures = ["Custom Field", "Custom Script"]
+fixtures = [{"doctype":"Custom Field", "filters": [["name", "!=", "Supplier-octopart_seller_name"]]}, "Custom Script"]
 
 # Permissions
 # -----------
