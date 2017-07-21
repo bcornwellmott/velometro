@@ -8,7 +8,39 @@ from frappe.utils.file_manager import save_url, save_file, get_file_name, remove
 from frappe.utils import get_site_path, get_files_path, random_string, encode
 import json
 
+@frappe.whitelist()
+def get_valid_invoice_approvers(doctype, txt, searchfield, start, page_len, filters):
+	print str(filters)
+	pi = frappe.get_doc('Purchase Invoice', filters['name'])
+	
+	approvers = []
+	for item in pi.items:
+		if item.purchase_order:
+			submitter = frappe._dict({})
+			submitter['item'] = frappe.get_value('Purchase Order', item.purchase_order, 'modified_by')
+			submitter['name'] = frappe.get_value('Employee', {"user_id": submitter.item}, 'name')
+			if not any(x.name == submitter.name for x in approvers): 
+				approvers.append(submitter)
+	
+	managers = frappe.db.sql("""select emp.name as name, user.first_name, user.last_name from
+		tabUser user, `tabHas Role` user_role,  `tabEmployee` emp  where
+		user_role.role = "Purchase Manager"
+		and emp.user_id = user.name
+		and user_role.parent = user.name and user.enabled""", {},as_dict =1)
+	
+	for man in managers:
+		man.item = str(man.first_name) + " " + str(man.last_name)
+		if not any(x.name == man.name for x in approvers): 
+			approvers.append(man)
+	
+	final = []
+	for app in approvers:
+		row = (app.name, app.item)
+		final.append(row)
+	
+	return final
 
+	
 @frappe.whitelist()
 def remove_all_docs(document):
 	"""This function attaches drawings to the purchase order based on the items being ordered"""
