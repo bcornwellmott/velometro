@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _, throw
+from frappe import _, throw, ValidationError
 from frappe.utils import getdate
 import json
+
+class InvalidVacationHoursError(frappe.ValidationError): pass
 
 
 @frappe.whitelist()
@@ -15,6 +17,9 @@ def check_for_new_leave(self, method):
 	for detail in self.time_logs:
 		is_overlap = 0
 		if detail.activity_type == "VMI091 - Vacation":
+			# Make sure a multiple of 4 hours
+			if detail.hours % 4 != 0:
+				frappe.throw(_('Vacation requests must be made for 4 hrs or 8 hours'), InvalidVacationHoursError)
 		 	#Check to make sure there is no leave application for the employee for these dates
 			for d in frappe.db.sql("""
 				select name
@@ -36,9 +41,11 @@ def check_for_new_leave(self, method):
 				#frappe.msgprint("Vacation Leave Application needs to be created for " + detail.from_time)
 				link = create_leave(detail, self.employee, 'Vacation')
 				detail.leave_application = link
-				#detail.save()
+				detail.save()
 				
 		elif detail.activity_type == "VMI095 - Holiday Shutdown":
+			if detail.hours % 4 == 0:
+				frappe.throw(_('Vacation requests must be made for 4 hrs or 8 hours'), InvalidVacationHoursError)
 			for d in frappe.db.sql("""
 				select name
 				from `tabLeave Application`
@@ -59,7 +66,7 @@ def check_for_new_leave(self, method):
 				#frappe.msgprint("Vacation Leave Application needs to be created for " + detail.from_time)
 				link = create_leave(detail, self.employee,'Holiday Shutdown')
 				detail.leave_application = link
-				#detail.save()
+				detail.save()
 	frappe.clear_cache()
 	
 def create_leave(detail, employee, type):
@@ -75,6 +82,8 @@ def create_leave(detail, employee, type):
 		leave_approver = approvers[0],
 		employee=employee,
 		total_leave_days=detail.hours/8.0)
+	if detail.hours == 4:
+		mydict['half_day'] = 1
 	my_leave = frappe.get_doc(mydict).insert()
 	frappe.msgprint("Created Leave Application for " + type + " on " + str(getdate(detail.from_time)) + ". Please make sure you submit this Leave Application to your Leave Approver.")
 	return my_leave.name
