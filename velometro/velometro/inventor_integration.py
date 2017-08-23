@@ -79,15 +79,15 @@ def get_affected_parent_boms(bom_no):
 	return bom_list
 	
 def update_description(doc, method):
-	mfg = "OEM".encode('utf-8')
-	notes = "".encode('utf-8')
+	mfg = "OEM".decode('utf-8')
+	notes = "".decode('utf-8')
 	if doc.get("notes") is not None:
-		notes = doc.get("notes").encode('utf-8')
+		notes = doc.get("notes").decode('utf-8')
 	if doc.get("manufacturer") is not None:
 		mfg = doc.get("manufacturer")
-		mfg = mfg.encode('utf-8')
+		mfg = mfg.decode('utf-8')
 	if doc.get("manufacturer_part_no") is not None:
-		utf8 = [notes.encode('utf-8'), " (".encode('utf-8'), mfg.encode('utf-8'), " PN: ".encode('utf-8'), doc.get("manufacturer_part_no").encode('utf-8'), ")".encode('utf-8')]
+		utf8 = [notes.decode('utf-8'), " (".decode('utf-8'), mfg.decode('utf-8'), " PN: ".decode('utf-8'), doc.get("manufacturer_part_no").decode('utf-8'), ")".decode('utf-8')]
 		description = "".join(utf8)
 	else:
 		description = notes
