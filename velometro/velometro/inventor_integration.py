@@ -87,7 +87,8 @@ def update_description(doc, method):
 		mfg = doc.get("manufacturer")
 		mfg = mfg.encode('utf-8')
 	if doc.get("manufacturer_part_no") is not None:
-		description = notes + " (" + mfg + " PN: " + doc.get("manufacturer_part_no").encode('utf-8') + ")"
+		utf8 = [notes, " (".encode('utf-8'), mfg, " PN: ".encode('utf-8'), doc.get("manufacturer_part_no").encode('utf-8'), ")".encode('utf-8')]
+		description = "".join(utf8)
 	else:
 		description = notes
 	doc.set("description", description)
