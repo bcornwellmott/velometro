@@ -81,12 +81,12 @@ def get_affected_parent_boms(bom_no):
 def update_description(doc, method):
 	mfg = "OEM"
 	notes = ""
-	if doc.get("notes") != None:
+	if doc.get("notes") is not None:
 		notes = doc.get("notes").encode('utf-8')
-	if doc.get("manufacturer") != None:
+	if doc.get("manufacturer") is not None:
 		mfg = frappe.get_value("Manufacturer", doc.get("manufacturer"), "short_name")
 		mfg = mfg.encode('utf-8')
-	if doc.get("manufacturer_part_no") != None:
+	if doc.get("manufacturer_part_no") is not None:
 		description = notes + " (" + mfg + " PN: " + doc.get("manufacturer_part_no").encode('utf-8') + ")"
 	else:
 		description = notes
