@@ -77,3 +77,17 @@ def get_affected_parent_boms(bom_no):
 		#if level_up not in bom_list:
 		#bom_list.append(level_up)
 	return bom_list
+	
+def update_description(doc, method):
+	mfg = "OEM"
+	notes = ""
+	if doc.get("notes") != None:
+		notes = doc.get("notes")
+	if doc.get("manufacturer") != None:
+		mfg = frappe.get_value("Manufacturer", doc.get("manufacturer"), "short_name")
+	if doc.get("manufacturer_part_no") != None:
+		description = str(notes) + " (" + str(mfg) + " PN: " + str(doc.get("manufacturer_part_no")) + ")"
+	else:
+		description = str(notes)
+	doc.set("description", description)
+	

@@ -77,6 +77,9 @@ fixtures = [{"doctype":"Custom Field", "filters": [["name", "!=", "Supplier-octo
 doc_events = {
 	"Timesheet": {
 		"on_submit": "velometro.velometro.vacation.check_for_new_leave"
+	},
+    "Item": {
+		"before_save": "velometro.velometro.inventor_integration.update_description"
 	}
   
 }
