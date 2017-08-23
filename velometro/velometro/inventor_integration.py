@@ -82,12 +82,13 @@ def update_description(doc, method):
 	mfg = "OEM"
 	notes = ""
 	if doc.get("notes") != None:
-		notes = doc.get("notes")
+		notes = doc.get("notes").encode('utf-8')
 	if doc.get("manufacturer") != None:
 		mfg = frappe.get_value("Manufacturer", doc.get("manufacturer"), "short_name")
+		mfg = mfg.encode('utf-8')
 	if doc.get("manufacturer_part_no") != None:
-		description = notes.encode('utf-8') + " (" + mfg.encode('utf-8') + " PN: " + doc.get("manufacturer_part_no").encode('utf-8') + ")"
+		description = notes + " (" + mfg + " PN: " + doc.get("manufacturer_part_no").encode('utf-8') + ")"
 	else:
-		description = notes.encode('utf-8')
+		description = notes
 	doc.set("description", description)
 	
