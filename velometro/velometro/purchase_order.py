@@ -196,7 +196,7 @@ def zip_attachments(document):
 			
 			content = base64.b64encode(content)
 				
-			save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", 1)
+			save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", is_private=1)
 			fname = get_file_name(document2.name + " (zip " + str(zip_count) + ").zip", random_string(7))
 			docZip = zipfile.ZipFile(fname,"w", zipfile.ZIP_DEFLATED)
 		docZip.write(path, os.path.basename(path))
@@ -209,4 +209,4 @@ def zip_attachments(document):
 	
 	content = base64.b64encode(content)
 		
-	save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", 1)
+	save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", is_private=1)
