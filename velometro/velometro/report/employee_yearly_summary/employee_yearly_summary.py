@@ -3,9 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
+import openpyxl
 from frappe.utils import date_diff, cstr
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
+from frappe.desk.query_report import run, get_columns_dict
+from six import string_types
 
 
 def execute(filters=None):
@@ -16,7 +19,76 @@ def execute(filters=None):
 
 	return columns, data
 
+@frappe.whitelist()
+def export_all(employee, year):
+
+	wb = openpyxl.Workbook(write_only=False)
 	
+	if (employee is None) or (employee == "") or (employee == "null"):
+		employee_list = frappe.get_list("Employee")
+	else:
+		employee_list = [employee]
+	
+	if (year is None) or (year == "") or (year == "null"):
+		year_list = frappe.get_list("Fiscal Year")
+	else:
+		year_list = [year]
+	
+	for emp in employee_list:
+		for yr in year_list:
+			empn = frappe.get_value("Employee", emp, "employee_name")
+			yearn = frappe.get_value("Fiscal Year", yr, "year")
+			ws = str(empn) + " (" + str(yearn) + ")"
+			frappe.msgprint("Exporting " + ws)
+			export_my_query({'employee':emp, 'fiscal_year':yr}, ws, wb)
+	
+def export_my_query(filters, ws=None,wb=None):
+
+	data = frappe._dict(frappe.local.form_dict)
+	del data["cmd"]
+	if "csrf_token" in data:
+		del data["csrf_token"]
+		
+	if isinstance(data.get("report_name"), string_types):
+		report_name = data["report_name"]
+	if isinstance(data.get("visible_idx"), string_types):
+		visible_idx = json.loads(data.get("visible_idx"))
+	else:
+		visible_idx = None
+	
+	data = run("Employee Yearly Summary", filters)
+	data = frappe._dict(data)
+	columns = get_columns_dict(data.columns)
+
+	result = [[]]
+
+	# add column headings
+	for idx in range(len(data.columns)):
+		result[0].append(columns[idx]["label"])
+
+	# build table from dict
+	if isinstance(data.result[0], dict):
+		for i,row in enumerate(data.result):
+			# only rows which are visible in the report
+			if row:
+				row_list = []
+				for idx in range(len(data.columns)):
+					row_list.append(row.get(columns[idx]["fieldname"],""))
+				result.append(row_list)
+			elif not row:
+				result.append([])
+	else:
+		result = result + [d for i,d in enumerate(data.result) if (i+1 in visible_idx)]
+
+	from frappe.utils.xlsxutils import make_xlsx
+	if ws is None:
+		ws = "Query Report"
+	xlsx_file = make_xlsx(result, ws, wb)
+	
+	frappe.response['filename'] = report_name + '.xlsx'
+	frappe.response['filecontent'] = xlsx_file.getvalue()
+	frappe.response['type'] = 'binary'
+
 def get_hours(employee, fiscal_year):
 	out = []
 	month_list = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -60,11 +132,8 @@ def get_hours(employee, fiscal_year):
 		working_days = date_diff(start_date, joining_date) - len(holidays)
 	else:
 		working_days = 0
-	prev_ot_hrs = prev_total_hrs - 8 * working_days
-	#if prev_ot_hrs < 0:
-	#	prev_ot_hrs = 0	
-	#prev_ot_hrs -= prev_lieu_hrs	
-		
+	prev_ot_hrs = max(0,prev_total_hrs - 8 * working_days)
+
 				
 	row = frappe._dict({
 		"month": "START OF YEAR",
