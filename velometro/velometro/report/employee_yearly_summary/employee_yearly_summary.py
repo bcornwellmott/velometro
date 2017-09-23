@@ -51,10 +51,6 @@ def export_my_query(filters, ws=None,wb=None):
 		
 	if isinstance(data.get("report_name"), string_types):
 		report_name = data["report_name"]
-	if isinstance(data.get("visible_idx"), string_types):
-		visible_idx = json.loads(data.get("visible_idx"))
-	else:
-		visible_idx = None
 	
 	data = run("Employee Yearly Summary", filters)
 	data = frappe._dict(data)
@@ -78,7 +74,7 @@ def export_my_query(filters, ws=None,wb=None):
 			elif not row:
 				result.append([])
 	else:
-		result = result + [d for i,d in enumerate(data.result) if (i+1 in visible_idx)]
+		result = result + [d for i,d in enumerate(data.result)]
 
 	from frappe.utils.xlsxutils import make_xlsx
 	if ws is None:
