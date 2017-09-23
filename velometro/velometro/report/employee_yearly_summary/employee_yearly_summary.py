@@ -125,8 +125,11 @@ def get_hours(employee, fiscal_year):
 				working_days = 0
 		else:
 			working_days = 0
-
-		ot_hrs = total_hrs - 8 * working_days 
+		
+		if working_days > 0:
+			ot_hrs = max(0,total_hrs - 8 * working_days)
+		else:
+			ot_hrs = 0
 		#if ot_hrs < 0:
 		#	ot_hrs = 0
 		#ot_hrs -= lieu_hrs
