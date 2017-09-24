@@ -155,7 +155,7 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 				if (showApprovals < 1) {
 					frm.set_value(property, 0);
 				}
-				if (showApprovals != 1 || property.endsWith("1")) {
+				if (showApprovals != 1) {
 					frm.toggle_display(property,false);
 				}
 				else {
@@ -166,7 +166,7 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 				if (showApprovals < 2)	{
 					frm.set_value(property, 0);
 				}
-				if (showApprovals != 2 || property.endsWith("1")) {
+				if (showApprovals != 2) {
 					frm.toggle_display(property,false);
 				}
 				else {
