@@ -8,11 +8,11 @@ frappe.ui.form.on("Purchase Invoice", "validate", function(frm) {
 
 			for (var property in frm.fields_dict) {
 				if (frm.fields_dict.hasOwnProperty(property)) {
-					if (property.startsWith('approvalcheck')) {
+					if (property.startsWith('approvalcheck')  && !property.endsWith("1")) {
 						if(frm.fields_dict.hasOwnProperty(property + "1"))
 						{
-							frm.doc[property] == frm.doc[property] | frm.doc[property + "1"]
-							frm.doc[property + "1"] == frm.doc[property] | frm.doc[property + "1"]
+							frm.doc[property] = frm.doc[property] | frm.doc[property + "1"];
+							frm.doc[property + "1"] = frm.doc[property] | frm.doc[property + "1"];
 						}
 						if(frm.doc[property] == 0) {
 							frappe.validated = false;
@@ -27,11 +27,11 @@ frappe.ui.form.on("Purchase Invoice", "validate", function(frm) {
 
 			for (var property in frm.fields_dict) {
 				if (frm.fields_dict.hasOwnProperty(property)) {
-					if (property.startsWith('purchasecheck')) {
+					if (property.startsWith('purchasecheck')  && !property.endsWith("1")) {
 						if(frm.fields_dict.hasOwnProperty(property + "1"))
 						{
-							frm.doc[property] == frm.doc[property] | frm.doc[property + "1"]
-							frm.doc[property + "1"] == frm.doc[property] | frm.doc[property + "1"]
+							frm.doc[property] = frm.doc[property] | frm.doc[property + "1"];
+							frm.doc[property + "1"] = frm.doc[property] | frm.doc[property + "1"];
 						}
 						if(frm.doc[property] == 0) {
 							frappe.validated = false;
@@ -90,15 +90,13 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 				function (values) {	
 					var pass = 1;
 					for (var property in values) {
-						if (values.hasOwnProperty(property)) {
+						if (values.hasOwnProperty(property) && frm.fields_dict.hasOwnProperty(property)) {
 							frm.doc[property] = values[property];
 							if (values[property] != 1) {
 								pass = 0;
 							}
-						}if (values.hasOwnProperty(property + "1")) {
-							frm.doc[property+"1"] = values[property];
-							if (values[property+"1"] != 1) {
-								pass = 0;
+							if (frm.fields_dict.hasOwnProperty(property + "1")) {
+								frm.doc[property+"1"] = values[property];
 							}
 						}
 					}
@@ -126,15 +124,14 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 				function (values) {	
 					var pass = 1;
 					for (var property in values) {
-						if (values.hasOwnProperty(property)) {
+						if (values.hasOwnProperty(property) && frm.fields_dict.hasOwnProperty(property)) {
 							frm.doc[property] = values[property];
 							if (values[property] != 1) {
 								pass = 0;
 							}
-						}if (values.hasOwnProperty(property + "1")) {
-							frm.doc[property+"1"] = values[property];
-							if (values[property+"1"] != 1) {
-								pass = 0;
+							if (frm.fields_dict.hasOwnProperty(property + "1")) {
+								frm.doc[property+"1"] = values[property];
+
 							}
 						}
 					}
