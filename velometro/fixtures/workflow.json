@@ -1,0 +1,93 @@
+[
+ {
+  "docstatus": 0, 
+  "doctype": "Workflow", 
+  "document_type": "Purchase Invoice", 
+  "is_active": 1, 
+  "modified": "2017-08-01 05:52:20.920332", 
+  "name": "Purchase Invoice Approval", 
+  "override_status": 1, 
+  "states": [
+   {
+    "allow_edit": "Accounts User", 
+    "doc_status": "0", 
+    "message": "Please enter all the Purchase Invoice information.", 
+    "state": "Pending", 
+    "update_field": "", 
+    "update_value": null
+   }, 
+   {
+    "allow_edit": "Accounts User", 
+    "doc_status": "0", 
+    "message": "Please review all the information.", 
+    "state": "Ready for Review", 
+    "update_field": null, 
+    "update_value": null
+   }, 
+   {
+    "allow_edit": "Purchase Manager", 
+    "doc_status": "0", 
+    "message": "Please ensure the Purchase Invoice matches the Purchase Order and Purchase Receipt", 
+    "state": "Approved by Accounting", 
+    "update_field": null, 
+    "update_value": null
+   }, 
+   {
+    "allow_edit": "All", 
+    "doc_status": "1", 
+    "message": "Approved!", 
+    "state": "Approved", 
+    "update_field": null, 
+    "update_value": null
+   }, 
+   {
+    "allow_edit": "All", 
+    "doc_status": "2", 
+    "message": null, 
+    "state": "Cancelled", 
+    "update_field": null, 
+    "update_value": null
+   }
+  ], 
+  "transitions": [
+   {
+    "action": "Submit for Review", 
+    "allowed": "Accounts User", 
+    "next_state": "Ready for Review", 
+    "state": "Pending"
+   }, 
+   {
+    "action": "Approve", 
+    "allowed": "Accounts Manager", 
+    "next_state": "Approved by Accounting", 
+    "state": "Ready for Review"
+   }, 
+   {
+    "action": "Approve", 
+    "allowed": "Purchase Manager", 
+    "next_state": "Approved", 
+    "state": "Approved by Accounting"
+   }, 
+   {
+    "action": "Reject", 
+    "allowed": "Accounts Manager", 
+    "next_state": "Pending", 
+    "state": "Ready for Review"
+   }, 
+   {
+    "action": "Reject", 
+    "allowed": "Purchase Manager", 
+    "next_state": "Pending", 
+    "state": "Approved by Accounting"
+   }, 
+   {
+    "action": "Cancel", 
+    "allowed": "All", 
+    "next_state": "Cancelled", 
+    "state": "Approved"
+   }
+  ], 
+  "workflow_name": "Purchase Invoice Approval", 
+  "workflow_state_field": "workflow_state"
+ }
+]
