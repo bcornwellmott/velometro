@@ -2,7 +2,13 @@
 
 frappe.ui.form.on("Purchase Invoice", "validate", function(frm) {
 	
-	var emp_name = frappe.defaults.get_user_permissions().Employee[0];
+	var emp_name = "";
+	if (frappe.defaults.get_user_permissions().hasOwnProperty("Employee"))
+	{
+		emp_name = frappe.defaults.get_user_permissions().Employee[0];
+	} else {
+		emp_name = frappe.defaults.get_user_default("Employee") || "";
+	}
 	if (frm.doc.workflow_state != frm.doc.last_workflow_state) {
 		if(frm.doc.last_workflow_state == "Ready for Review" && frm.doc.workflow_state == "Approved by Accounting") {
 
@@ -72,8 +78,13 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 
 	//In the pending workflow
 	var showApprovals = 0;
-	debugger;
-	var emp_name = frappe.defaults.get_user_permissions().Employee[0];
+	var emp_name = "";
+	if (frappe.defaults.get_user_permissions().hasOwnProperty("Employee"))
+	{
+		emp_name = frappe.defaults.get_user_permissions().Employee[0];
+	} else {
+		emp_name = frappe.defaults.get_user_default("Employee") || "";
+	}
 	if(frm.doc.workflow_state == "Ready for Review") {
 		showApprovals = 1;
 		frm.add_custom_button(__('Accounting Checklist'), function(doc){
