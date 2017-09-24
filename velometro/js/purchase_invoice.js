@@ -45,7 +45,7 @@ frappe.ui.form.on("Purchase Invoice", "validate", function(frm) {
 frappe.ui.form.on("Purchase Invoice", "onload", function(frm) {
 	if (frm.doc.__unsaved == undefined)
 	{
-		frm.toggle_display("approver",1);
+		frm.toggle_display("approver",true);
 		frm.set_query("approver", function(doc) {
 			console.log("getting");
 			return{
@@ -64,6 +64,7 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 
 	//In the pending workflow
 	var showApprovals = 0;
+	debugger;
 	var emp_name = frappe.defaults.get_user_permissions().Employee[0];
 	if(frm.doc.workflow_state == "Ready for Review") {
 		showApprovals = 1;
@@ -137,22 +138,21 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 					frm.set_value(property, 0);
 				}
 				else if (showApprovals != 1) {
-					frm.toggle_display(property,0);
+					frm.toggle_display(property,false);
 				}
 				else {
-					frm.toggle_display(property,1);
+					frm.toggle_display(property,true);
 				}
 			}
 			if (property.startsWith('purchasecheck')) {
-				frm.toggle_display(property,showApprovals);
 				if (showApprovals < 2)	{
 					frm.set_value(property, 0);
 				}
 				else if (showApprovals != 2) {
-					frm.toggle_display(property,0);
+					frm.toggle_display(property,false);
 				}
 				else {
-					frm.toggle_display(property,1);
+					frm.toggle_display(property,true);
 				}
 
 			}
