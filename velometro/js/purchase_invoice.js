@@ -55,6 +55,7 @@ frappe.ui.form.on("Purchase Invoice", "onload", function(frm) {
 		});
 	}
 	var showApprovals = 0;
+	var emp_name = frappe.defaults.get_user_permissions().Employee[0];
 	if(frm.doc.workflow_state == "Ready for Review") {
 		showApprovals = 1;
 	}
