@@ -9,6 +9,11 @@ frappe.ui.form.on("Purchase Invoice", "validate", function(frm) {
 			for (var property in frm.fields_dict) {
 				if (frm.fields_dict.hasOwnProperty(property)) {
 					if (property.startsWith('approvalcheck')) {
+						if(frm.fields_dict.hasOwnProperty(property + "1"))
+						{
+							frm.doc[property] == frm.doc[property] | frm.doc[property + "1"]
+							frm.doc[property + "1"] == frm.doc[property] | frm.doc[property + "1"]
+						}
 						if(frm.doc[property] == 0) {
 							frappe.validated = false;
 							frappe.msgprint(__("Accouting Checklist must be completed before submiting this Purchase Invoice"));
@@ -23,6 +28,11 @@ frappe.ui.form.on("Purchase Invoice", "validate", function(frm) {
 			for (var property in frm.fields_dict) {
 				if (frm.fields_dict.hasOwnProperty(property)) {
 					if (property.startsWith('purchasecheck')) {
+						if(frm.fields_dict.hasOwnProperty(property + "1"))
+						{
+							frm.doc[property] == frm.doc[property] | frm.doc[property + "1"]
+							frm.doc[property + "1"] == frm.doc[property] | frm.doc[property + "1"]
+						}
 						if(frm.doc[property] == 0) {
 							frappe.validated = false;
 							frappe.msgprint(__("Purchasing Checklist must be completed before submiting this Purchase Invoice"));
@@ -54,46 +64,6 @@ frappe.ui.form.on("Purchase Invoice", "onload", function(frm) {
 			}
 		});
 	}
-	var showApprovals = 0;
-	var emp_name = frappe.defaults.get_user_permissions().Employee[0];
-	if(frm.doc.workflow_state == "Ready for Review") {
-		showApprovals = 1;
-	}
-	else if(frm.doc.workflow_state == "Approved by Accounting" && emp_name == frm.doc.approver) {
-		showApprovals = 2;
-	}
-	else if(frm.doc.workflow_state == "Approved") {
-		showApprovals = 3;
-	}
-	
-	for (var property in frm.fields_dict) {
-		if (frm.fields_dict.hasOwnProperty(property)) {
-			if (property.startsWith('approvalcheck')) {
-				
-				if (showApprovals < 1) {
-					frm.set_value(property, 0);
-				}
-				else if (showApprovals != 1) {
-					frm.toggle_display(property,false);
-				}
-				else {
-					frm.toggle_display(property,true);
-				}
-			}
-			if (property.startsWith('purchasecheck')) {
-				if (showApprovals < 2)	{
-					frm.set_value(property, 0);
-				}
-				else if (showApprovals != 2) {
-					frm.toggle_display(property,false);
-				}
-				else {
-					frm.toggle_display(property,true);
-				}
-
-			}
-		}
-	}	
 	
 });
 
@@ -110,7 +80,7 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 			var cbs = []
 			for (var property in frm.fields_dict) {
 				if (frm.fields_dict.hasOwnProperty(property)) {
-					if (property.startsWith('approvalcheck')) {
+					if (property.startsWith('approvalcheck') && !property.endsWith("1")) {
 						cbs.push({fieldname: frm.fields_dict[property].df.fieldname, label: __(frm.fields_dict[property].df.label),fieldtype: frm.fields_dict[property].df.fieldtype, 'default': frm.doc[property]});
 					}
 				}
@@ -123,6 +93,11 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 						if (values.hasOwnProperty(property)) {
 							frm.doc[property] = values[property];
 							if (values[property] != 1) {
+								pass = 0;
+							}
+						}if (values.hasOwnProperty(property + "1")) {
+							frm.doc[property+"1"] = values[property];
+							if (values[property+"1"] != 1) {
 								pass = 0;
 							}
 						}
@@ -141,7 +116,7 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 			var cbs = []
 			for (var property in frm.fields_dict) {
 				if (frm.fields_dict.hasOwnProperty(property)) {
-					if (property.startsWith('purchasecheck')) {
+					if (property.startsWith('purchasecheck')&& !property.endsWith("1")) {
 						cbs.push({fieldname: frm.fields_dict[property].df.fieldname, label: __(frm.fields_dict[property].df.label),fieldtype: frm.fields_dict[property].df.fieldtype, 'default': frm.doc[property]});
 					}
 				}
@@ -154,6 +129,11 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 						if (values.hasOwnProperty(property)) {
 							frm.doc[property] = values[property];
 							if (values[property] != 1) {
+								pass = 0;
+							}
+						}if (values.hasOwnProperty(property + "1")) {
+							frm.doc[property+"1"] = values[property];
+							if (values[property+"1"] != 1) {
 								pass = 0;
 							}
 						}
@@ -175,7 +155,7 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 				if (showApprovals < 1) {
 					frm.set_value(property, 0);
 				}
-				else if (showApprovals != 1) {
+				if (showApprovals != 1 || property.endsWith("1")) {
 					frm.toggle_display(property,false);
 				}
 				else {
@@ -186,7 +166,7 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 				if (showApprovals < 2)	{
 					frm.set_value(property, 0);
 				}
-				else if (showApprovals != 2) {
+				if (showApprovals != 2 || property.endsWith("1")) {
 					frm.toggle_display(property,false);
 				}
 				else {
