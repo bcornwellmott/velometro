@@ -25,12 +25,12 @@ def export_all(employee, year):
 	wb = openpyxl.Workbook(write_only=False)
 	
 	if (employee is None) or (employee == "") or (employee == "null"):
-		employee_list = frappe.get_list("Employee")
+		employee_list = frappe.get_list("Employee", filters={'status': "Active"})
 	else:
 		employee_list = [employee]
 	
 	if (year is None) or (year == "") or (year == "null"):
-		year_list = frappe.get_list("Fiscal Year")
+		year_list = frappe.get_list("Fiscal Year", filters={'disabled': 0})
 	else:
 		year_list = [year]
 	
