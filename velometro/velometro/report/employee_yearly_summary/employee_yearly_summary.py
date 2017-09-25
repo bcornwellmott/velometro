@@ -185,7 +185,7 @@ def get_hours(employee, fiscal_year):
 		if end_date > current_date:
 			end_date = current_date
 		if end_date > start_date:
-			month_start_date = start_date if start_date < joining_date else joining_date
+			month_start_date = start_date if start_date >= joining_date else joining_date
 			holidays = get_holidays_for_employee(employee, month_start_date, end_date)
 			if start_date >= joining_date:
 				working_days = date_diff(end_date, start_date) + 1 - len(holidays)
