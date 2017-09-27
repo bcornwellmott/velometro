@@ -27,20 +27,20 @@ def export_all(employee, year):
 	if (employee is None) or (employee == "") or (employee == "null"):
 		employee_list = frappe.get_list("Employee", filters={'status': "Active"})
 	else:
-		employee_list = [employee]
+		employee_list = frappe.get_list("Employee", filters={'status': "Active", 'name': employee})
 	
 	if (year is None) or (year == "") or (year == "null"):
 		year_list = frappe.get_list("Fiscal Year", filters={'disabled': 0})
 	else:
-		year_list = [year]
+		year_list = frappe.get_list("Fiscal Year", filters={'disabled': 0, 'name': year})
 	
 	for emp in employee_list:
 		for yr in year_list:
-			empn = frappe.get_value("Employee", emp, "employee_name")
-			yearn = frappe.get_value("Fiscal Year", yr, "year")
+			empn = frappe.get_value("Employee", emp.name, "employee_name")
+			yearn = frappe.get_value("Fiscal Year", yr.name, "year")
 			ws = str(empn) + " (" + str(yearn) + ")"
-			frappe.msgprint("Exporting " + ws)
-			export_my_query({'employee':emp, 'fiscal_year':yr}, ws, wb)
+			#frappe.msgprint("Exporting " + str(emp.name) + ", " + str(yr.name))
+			export_my_query({'employee':emp.name, 'fiscal_year':yr.name}, ws, wb)
 	
 def export_my_query(filters, ws=None,wb=None):
 
@@ -105,6 +105,7 @@ def get_hours(employee, fiscal_year):
 	prev_lieu_hrs = 0
 	prev_ot_hrs = 0
 
+	
 	m = get_month_details(fiscal_year, 1)
 	start_date = m['month_start_date']
 	current_date = frappe.utils.getdate(frappe.utils.nowdate())
@@ -123,13 +124,17 @@ def get_hours(employee, fiscal_year):
 				
 	#Get the starting value working days
 	joining_date = frappe.db.get_value("Employee", employee,["date_of_joining"])
-	holidays = get_holidays_for_employee(employee, joining_date, start_date)
-	if start_date >= joining_date:
-		working_days = date_diff(start_date, joining_date) - len(holidays)
+	working_days = 0
+	if not joining_date is None:
+		holidays = get_holidays_for_employee(employee, joining_date, start_date)
+		if start_date >= joining_date:
+			working_days = date_diff(start_date, joining_date) - len(holidays)
+		else:
+			working_days = 0
 	else:
-		working_days = 0
+		working_days
 	prev_ot_hrs = max(0,prev_total_hrs - 8 * working_days)
-
+	
 				
 	row = frappe._dict({
 		"month": "START OF YEAR",
@@ -178,19 +183,22 @@ def get_hours(employee, fiscal_year):
 				ytd_total -= timesheet_hrs.hours
 				
 		#Get the hours in each month you're supposed to work
-		if end_date > current_date:
-			end_date = current_date
-		if end_date > start_date:
-			month_start_date = start_date if start_date >= joining_date else joining_date
-			holidays = get_holidays_for_employee(employee, month_start_date, end_date)
-			if start_date >= joining_date:
-				working_days = date_diff(end_date, start_date) + 1 - len(holidays)
-			elif end_date >= joining_date:
-				working_days = date_diff(end_date, joining_date) + 1 - len(holidays)
+		if joining_date is None:
+			working_days = 0
+		else:
+			if end_date > current_date:
+				end_date = current_date
+			if end_date > start_date:
+				month_start_date = start_date if start_date >= joining_date else joining_date
+				holidays = get_holidays_for_employee(employee, month_start_date, end_date)
+				if start_date >= joining_date:
+					working_days = date_diff(end_date, start_date) + 1 - len(holidays)
+				elif end_date >= joining_date:
+					working_days = date_diff(end_date, joining_date) + 1 - len(holidays)
+				else:
+					working_days = 0
 			else:
 				working_days = 0
-		else:
-			working_days = 0
 		
 		if working_days > 0:
 			ot_hrs = max(0,total_hrs - 8 * working_days)

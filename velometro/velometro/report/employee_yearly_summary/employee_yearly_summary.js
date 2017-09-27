@@ -32,7 +32,20 @@ frappe.query_reports["Employee Yearly Summary"] = {
 				}
 				
 				open_url_post(frappe.request.url, args);
-				 
+				
+				
+				/*var args = {
+					employee: frm.filters[0].value,
+					year: frm.filters[1].value
+				}
+				
+				 frappe.call({
+					'method':  'velometro.velometro.report.employee_yearly_summary.employee_yearly_summary.export_all',
+					'args': args,
+					'callback': function() {
+						frm.reload_doc();
+					}
+				});*/
 			});
 		}
 	}
