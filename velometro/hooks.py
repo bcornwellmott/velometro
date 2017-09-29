@@ -84,7 +84,9 @@ doc_events = {
   
 }
 
- 
+doctype_js = {
+	"Purchase Invoice": ["js/purchase_invoice.js"]
+}
 
 # doc_events = {
 # 	"*": {
