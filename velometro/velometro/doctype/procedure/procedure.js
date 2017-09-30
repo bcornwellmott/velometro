@@ -121,11 +121,11 @@ function pickerCallback(data) {
 				  '<center><iframe ',
 				  'src="https://docs.google.com/viewer?srcid=',
 				  id,
-				  '&pid=explorer&efh=false&a=v&chrome=false&embedded=true" width="95%" height="90%"></iframe></center>'
+				  '&pid=explorer&efh=false&a=v&chrome=false&embedded=true" width="95%" height="1000"></iframe></center>'
 				].join('');
 
 				cur_frm.set_value('content',iframe);
-				
+				frm.save();
 				});
 	}
 }
