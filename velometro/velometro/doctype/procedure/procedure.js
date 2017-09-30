@@ -103,22 +103,23 @@ function createPicker() {
 // A simple callback implementation.
 function pickerCallback(data) {
 	if (data.action == google.picker.Action.PICKED) {
-		var id= data.docs[0].id;
+		debugger;
 		var rev = 1;
 		var drive = window.gapi.client.drive;
 
-		drive.revisions.update({
+		var response = drive.revisions.update({
 			fileId: id,
-			revisionId: rev  
+			revisionId: rev,
 			}, {
 			published: true,
-			publishAuto: true
-			}).then(function() {
+			publishAuto: true,
+			pinned: true
+			}).then(function(resp) {
 				debugger;
 				var iframe = [
 				  '<center><iframe ',
-				  'src="https://docs.google.com/document/d/',
-				  id,
+				  'src="',
+				  resp.publishedLink,
 				  '/pub?embedded=true" width="800" height="1200"></iframe></center>'
 				].join('');
 
