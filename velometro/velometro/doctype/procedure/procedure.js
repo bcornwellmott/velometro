@@ -108,15 +108,15 @@ function pickerCallback(data) {
 		var rev = 1;
 		var drive = window.gapi.client.drive;
 
-		var response = drive.revisions.update({
+		drive.revisions.update({
 			fileId: id,
 			revisionId: rev,
 			}, {
 			published: true,
-			publishAuto: true,
+			publishAuto: false,
 			pinned: true
 			}).then(function(resp) {
-				debugger;
+				/*debugger;
 				var iframe = [
 				  '<center><iframe ',
 				  'src="',
@@ -124,7 +124,13 @@ function pickerCallback(data) {
 				  '/pub?embedded=true" width="800" height="1200"></iframe></center>'
 				].join('');
 
-				cur_frm.set_value('content',iframe);
+				cur_frm.set_value('content',iframe);*/
+				gapi.client.drive.revisions.get({
+					'fileId': fileId,
+					'revisionId': revisionId
+				  }).then(function(resp2){
+					  debugger;
+				  });
 				});
 	}
 }
