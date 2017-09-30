@@ -103,6 +103,7 @@ function createPicker() {
 // A simple callback implementation.
 function pickerCallback(data) {
 	if (data.action == google.picker.Action.PICKED) {
+		var id= data.docs[0].id;
 		debugger;
 		var rev = 1;
 		var drive = window.gapi.client.drive;
