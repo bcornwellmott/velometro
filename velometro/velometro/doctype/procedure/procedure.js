@@ -116,21 +116,16 @@ function pickerCallback(data) {
 			publishAuto: false,
 			pinned: true
 			}).then(function(resp) {
-				/*debugger;
+				debugger;
 				var iframe = [
 				  '<center><iframe ',
-				  'src="',
-				  resp.publishedLink,
-				  '/pub?embedded=true" width="800" height="1200"></iframe></center>'
+				  'src="https://docs.google.com/viewer?srcid=',
+				  id,
+				  '&pid=explorer&efh=false&a=v&chrome=false&embedded=true" width="95%" height="90%"></iframe></center>'
 				].join('');
 
-				cur_frm.set_value('content',iframe);*/
-				gapi.client.drive.files.get({
-					'fileId': id,
-					'revisionId': rev
-				  }).then(function(resp2){
-					  debugger;
-				  });
+				cur_frm.set_value('content',iframe);
+				
 				});
 	}
 }
