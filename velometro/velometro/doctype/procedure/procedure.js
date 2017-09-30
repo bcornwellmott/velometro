@@ -126,8 +126,8 @@ function pickerCallback(data) {
 
 				cur_frm.set_value('content',iframe);*/
 				gapi.client.drive.revisions.get({
-					'fileId': fileId,
-					'revisionId': revisionId
+					'fileId': id,
+					'revisionId': rev
 				  }).then(function(resp2){
 					  debugger;
 				  });
