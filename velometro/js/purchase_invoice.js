@@ -3,7 +3,7 @@
 frappe.ui.form.on("Purchase Invoice", "validate", function(frm) {
 	
 	var emp_name = "";
-	if (frappe.defaults.get_user_permissions().hasOwnProperty("Employee"))
+	if ("Employee" in frappe.defaults.get_user_permissions())
 	{
 		emp_name = frappe.defaults.get_user_permissions().Employee[0];
 	} else {
@@ -79,7 +79,7 @@ frappe.ui.form.on("Purchase Invoice", "refresh", function(frm) {
 	//In the pending workflow
 	var showApprovals = 0;
 	var emp_name = "";
-	if (frappe.defaults.get_user_permissions().hasOwnProperty("Employee"))
+	if ("Employee" in frappe.defaults.get_user_permissions())
 	{
 		emp_name = frappe.defaults.get_user_permissions().Employee[0];
 	} else {
