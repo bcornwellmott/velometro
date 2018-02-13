@@ -44,7 +44,7 @@ def check_for_new_leave(self, method):
 				detail.save()
 				
 		elif detail.activity_type == "VMI095 - Holiday Shutdown":
-			if detail.hours % 4 == 0:
+			if detail.hours % 4 != 0:
 				frappe.throw(_('Vacation requests must be made for 4 hrs or 8 hours'), InvalidVacationHoursError)
 			for d in frappe.db.sql("""
 				select name

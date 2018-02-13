@@ -6,7 +6,7 @@ import frappe
 import openpyxl
 from frappe.utils import date_diff, cstr
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
+from erpnext.hr.doctype.payroll_entry.payroll_entry import get_month_details
 from frappe.desk.query_report import run, get_columns_dict
 from six import string_types
 
