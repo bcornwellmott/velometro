@@ -34,7 +34,7 @@ class BOMQuote(Document):
 			purchased.qty = purchased.qty_per_asm  * self.quantity
 			if quote_details is not None:
 				purchased.purchase_rate = quote_details.rate
-				purchased.supplier_quotation_item = quote_details.supplier_quotation_item
+				purchased.supplier_quotation_link = quote_details.supplier_quotation_item
 				purchased.revision = quote_details.revision
 				purchased.total_price = quote_details.rate * purchased.qty
 				unit_pcost += purchased.purchase_rate
@@ -66,6 +66,15 @@ class BOMQuote(Document):
 			itm.parent = self.name
 			itm.parenttype = "BOM Quote"
 			idx += 1
+		
+		# Merge duplicates
+		
+		i = 0
+		while i < (count(self.items) - 1):
+			if self.items[i].item == self.items[i+1].item:
+				self.items[i].qty_per_asm += self.items[i+1].qty_per_asm
+			else:
+				i+=1
 			
 		#Sort by bom_no and reassign idx
 		self.operations.sort( key=getKey)
@@ -94,7 +103,7 @@ def add_bom_level(doc, qty, bom):
 	
 	#Go through each item in the BOM to decide if it is a Purchased or Manufactured item
 	for myItem in bom_doc.items:
-		item_quantity = qty * myItem.qty  
+		item_quantity = qty * myItem.stock_qty  
 		item_doc = frappe.get_doc("Item",myItem.item_code)
 		if myItem.bom_no and item_doc.default_material_request_type == "Manufacture":
 			# This is a manufactured item and we should add it to the BOM Operations then scan it's children
@@ -111,6 +120,7 @@ def get_purchase_item(item_code,qty):
 	doc.item = item_code
 	doc.sort_name = item_code.lower()
 	doc.description = frappe.get_value("Item",doc.item,"description")
+	doc.stock_uom = frappe.get_value("Item",doc.item,"stock_uom")
 	doc.item_name= frappe.get_value("Item",doc.item,"item_name")
 	doc.qty_per_asm= qty
 	doc.idx = None
@@ -157,10 +167,10 @@ def find_cheapest_price(item, qty):
 			quote_details = find_version_pricing(version.item_code, qty, version.revision)
 			if quote_details.rate > 0:
 				
-				frappe.msgprint("Found OLD rate of {0}for {1} from {2}".format(quote_details.rate, item.item, quote_details.supplier_quotation_item))
+				#frappe.msgprint("Found OLD rate of {0}for {1} from {2}".format(quote_details.rate, item.item, quote_details.supplier_quotation_item))
 				return quote_details
 	else: 
-		frappe.msgprint("Found CORRECT rate of {0}for {1} from {2}".format(quote_details.rate, item.item, quote_details.supplier_quotation_item))
+		#frappe.msgprint("Found CORRECT rate of {0}for {1} from {2}".format(quote_details.rate, item.item, quote_details.supplier_quotation_item))
 		return quote_details
 	return None
 				
@@ -176,13 +186,13 @@ def find_version_pricing(item, qty, revision):
 	quotes = frappe.get_all('Supplier Quotation Item',filters={'item_code': item, 'docstatus':1}, fields=['name', 'qty', 'base_rate'])
 	for quote in quotes: 
 		if quote.qty < qty:
-			
+			suom_rate = quote.base_rate / quote.conversion_rate
 			# We have a valid quote
-			if(quote_details.rate < 0 or (quote_details.rate > 0 and quote.base_rate < quote_details.rate)):
+			if(quote_details.rate < 0 or (quote_details.rate > 0 and suom_rate < quote_details.rate)):
 			
-				frappe.msgprint("Found rate of {0} for {1} from {2}".format(quote.base_rate,item,  quote.name ))
+				#frappe.msgprint("Found rate of {0} for {1} from {2}".format(suom_rate,item,  quote.name ))
 				quote_details.supplier_quotation_item = quote.name
-				quote_details.rate = quote.base_rate
+				quote_details.rate = suom_rate
 		
 	return quote_details
 	
