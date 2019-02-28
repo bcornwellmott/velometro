@@ -137,7 +137,7 @@ def attach_all_boms(document):
 		if not (bom.name + ".pdf") in current_attachments:
 			count = count + 1
 			my_attach = frappe.attach_print(bom.doctype, bom.name, doc=bom)
-			myFile = save_file(my_attach['fname'], my_attach['fcontent'], document2.doctype, document2.name, "Home/Attachments",False,1)
+			myFile = save_file(my_attach['fname'], my_attach['fcontent'], document2.doctype, document2.name, "Home/Attachments", decode=False, is_private=1)
 			myFile.file_name = my_attach['fname']
 			myFile.save()
 			current_attachments.append(my_attach['fname'])
@@ -174,7 +174,7 @@ def zip_attachments(document):
 	fname = get_file_name(document2.name + " (zip 1).zip", random_string(7))
 	
 	import zipfile
-	docZip = zipfile.ZipFile(fname,"w", zipfile.ZIP_DEFLATED)
+	docZip = zipfile.ZipFile(fname,"w", zipfile.ZIP_STORED)
 	
 	
 	for file_url in frappe.db.sql("""select file_url, is_private from `tabFile` where attached_to_doctype = %(doctype)s and attached_to_name = %(docname)s""", {'doctype': document2.doctype, 'docname': document2.name}, as_dict=True ):
@@ -196,9 +196,9 @@ def zip_attachments(document):
 			
 			content = base64.b64encode(content)
 				
-			save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", is_private=1)
+			save_file(fname, content, document2.doctype, document2.name, "Home/Attachments",  decode=True, is_private=1)
 			fname = get_file_name(document2.name + " (zip " + str(zip_count) + ").zip", random_string(7))
-			docZip = zipfile.ZipFile(fname,"w", zipfile.ZIP_DEFLATED)
+			docZip = zipfile.ZipFile(fname,"w", zipfile.ZIP_STORED)
 		docZip.write(path, os.path.basename(path))
 		zip_size  = zip_size + docZip.getinfo(os.path.basename(path)).compress_size
 		
@@ -209,4 +209,4 @@ def zip_attachments(document):
 	
 	content = base64.b64encode(content)
 		
-	save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", is_private=1)
+	save_file(fname, content, document2.doctype, document2.name, "Home/Attachments", decode=True,is_private=1)
