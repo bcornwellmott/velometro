@@ -112,7 +112,13 @@ doctype_js = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+	"cron": {
+		"0/4 * * * *": [
+			"velometro.velometro.doctype.performance_report.performance_report.generate_reports"
+		]
+	}
+}
 # 	"all": [
 # 		"velometro.tasks.all"
 # 	],

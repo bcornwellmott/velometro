@@ -80,7 +80,7 @@ frappe.ready(function() {
 					<input type="radio" name="rating" value="Banana Peel" class="ratingsRadio" onclick="updateRating(this)">
 				</td>
 			</tr>
-		</table> 
+		</table> <div id="unicornAnimation"><img src="unicorn.png" width="100%"></div>
 	`);
 	
 
@@ -127,7 +127,31 @@ function updateRating(sel)
 		var $input = $(this);
 		if ($input.attr("data-label") === "Rating") {
 			$input[0].value = sel.value;
+			if(sel.value === "Unicorn")
+			{
+				myMove();
+			}
 		}
 	})
 			
+}
+
+function myMove() {
+    var elem = document.getElementById("unicornAnimation"); 
+	
+    var posx = 1100;
+    var posy = -400;
+    var id = setInterval(frame, 10);
+    function frame() {
+        if (posx < - 400) {
+			elem.style.display = "none";
+            clearInterval(id);
+        } else {
+            posy+=4; 
+            posx-=6; 
+            elem.style.top = posx + 'px'; 
+            elem.style.left = posy + 'px'; 
+			elem.style.display = "block";
+        }
+    }
 }
