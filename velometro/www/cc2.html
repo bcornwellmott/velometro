@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{% block title %} {{ title | striptags }} {% endblock %}</title>
+	<meta name="generator" content="frappe">
+
+    {% block favicon %}
+	<link rel="shortcut icon"
+		href="{{ (favicon or "/assets/frappe/images/favicon.png") | abs_url }}"
+		type="image/x-icon">
+	<link rel="icon"
+		href="{{ (favicon or "/assets/frappe/images/favicon.png") | abs_url }}"
+		type="image/x-icon">
+    {% endblock %}
+	{%- block head -%}
+		{% if meta_block is defined -%}
+		{{ meta_block }}
+		{%- endif %}
+
+		{% if head_html is defined -%}
+		{{ head_html or "" }}
+		{%- endif %}
+
+		{%- for link in web_include_css %}
+		<link type="text/css" rel="stylesheet" href="{{ link|abs_url }}">
+		{%- endfor -%}
+
+	    {%- block head_include %}{{ head_include or "" }}{% endblock -%}
+
+		{%- block style %}{%- endblock -%}
+	{%- endblock -%}
+    <script>
+		window.frappe = {};
+		frappe.ready_events = [];
+		frappe.ready = function(fn) {
+			frappe.ready_events.push(fn);
+		}
+		window.dev_server = {{ dev_server }};
+    </script>
+	<style>
+	/**
+ * The CSS shown here will not be introduced in the Quickstart guide, but shows
+ * how you can use CSS to style your Element's container.
+ */
+.StripeElement {
+  background-color: white;
+  height: 40px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px 0 #e6ebf1;
+  -webkit-transition: box-shadow 150ms ease;
+  transition: box-shadow 150ms ease;
+}
+
+.StripeElement--focus {
+  box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.StripeElement--invalid {
+  border-color: #fa755a;
+}
+
+.StripeElement--webkit-autofill {
+  background-color: #fefde5 !important;
+}
+</style>
+</head>
+<body data-path="{{ path }}">
+	<div class="main-section">
+		<div>
+			<header>
+			{%- block banner -%}
+				{% include "templates/includes/banner_extension.html" ignore missing %}
+				{% if banner_html -%}
+				<div class="container">
+					<div class='banner'>
+						{{ banner_html or "" }}
+					</div>
+				</div>
+				{%- endif %}
+			{%- endblock -%}
+
+			{%- block navbar -%}
+                {% include "templates/includes/navbar/navbar.html" %}
+            {%- endblock -%}
+			</header>
+
+            <div class="hero-and-content">
+                <div data-html-block="hero">
+				{%- block hero -%}{%- endblock -%}
+                </div>
+				
+                <div class="container">
+                {% block content %}{% endblock %}
+				THIS IS A TEST
+				<form action="/charge" method="post" id="payment-form">
+				  <div class="form-row">
+					<label for="card-element">
+					  Credit or debit card
+					</label>
+					<div id="card-element">
+					  <!-- a Stripe Element will be inserted here. -->
+					</div>
+
+					<!-- Used to display form errors -->
+					<div id="card-errors" role="alert"></div>
+				  </div>
+
+				  <button>Submit Payment</button>
+				</form>
+
+				
+                </div>
+            </div>
+			{%- if footer is defined -%}
+			<footer class="page-footer">
+				<div class="container">
+					{{ footer }}
+				</div>
+			</footer>
+			{%- endif -%}
+		</div>
+		<div>
+			{%- block footer -%}{% include "templates/includes/footer/footer.html" %}{%- endblock -%}
+		</div>
+	</div>
+	{% block base_scripts %}
+	<!-- js should be loaded in body! -->
+	<script type="text/javascript"
+		src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+	<script type="text/javascript"
+		src="/assets/js/frappe-web.min.js"></script>
+	<script src="https://js.stripe.com/v3/"></script>
+	<script>
+						var stripe = Stripe('pk_test_uHdJEvZofYX2TkjSu7bvTX0w');
+						
+						// Create an instance of Elements
+						var elements = stripe.elements();
+
+						var style = {
+						  base: {
+							color: '#32325d',
+							lineHeight: '18px',
+							fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+							fontSmoothing: 'antialiased',
+							fontSize: '16px',
+							'::placeholder': {
+							  color: '#aab7c4'
+							}
+						  },
+						  invalid: {
+							color: '#fa755a',
+							iconColor: '#fa755a'
+						  }
+						};
+
+						// Create an instance of the card Element
+						var card = elements.create('card', {style: style});
+
+						// Add an instance of the card Element into the `card-element` <div>
+						card.mount('#card-element');
+
+						// Handle real-time validation errors from the card Element.
+						card.addEventListener('change', function(event) {
+						  var displayError = document.getElementById('card-errors');
+						  if (event.error) {
+							displayError.textContent = event.error.message;
+						  } else {
+							displayError.textContent = '';
+						  }
+						});
+						debugger;
+						// Handle form submission
+						var form = document.getElementById('payment-form');
+						form.addEventListener('submit', function(event) {
+						  event.preventDefault();
+
+						  stripe.createToken(card).then(function(result) {
+							if (result.error) {
+							  // Inform the user if there was an error
+							  var errorElement = document.getElementById('card-errors');
+							  errorElement.textContent = result.error.message;
+							} else {
+							  // Send the token to your server
+							  stripeTokenHandler(result.token);
+							}
+						  });
+						});
+												
+					
+					
+					
+				</script>
+	{% endblock %}
+    {%- if js_globals is defined %}
+    <script>
+    {%- for key, value in js_globals.iteritems() %}
+    window.{{ key }} = "{{ value[0] }}";
+    {%- endfor -%}
+    </script>
+    {% endif -%}
+
+	{%- for link in web_include_js %}
+	<script type="text/javascript" src="{{ link|abs_url }}"></script>
+	{%- endfor -%}
+
+    {%- block script %}{%- endblock %}
+
+	<!-- csrf_token -->
+
+    {%- block body_include %}{{ body_include or "" }}{% endblock -%}
+</body>
+</html>

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from frappe import _
 
 app_name = "velometro"
 app_title = "Velometro"
@@ -41,6 +42,18 @@ app_license = "MIT"
 
 # automatically create page for each record of this doctype
 # website_generators = ["Web Page"]
+#website_route_rules = [
+	#{"from_route": "/performance-evaluation", "to_route": "Performance Evaluation"},
+	#{"from_route": "/performance-evaluation/<path:name>", "to_route": "performance-evaluation",
+		#"defaults": {
+#			"doctype": "Performance Evaluation",
+#			"parents": [{"label": "Performance Evaluation", "route": "performance-evaluation"}]
+#		}
+#	}
+#]
+portal_menu_items = [
+ 	{"title": _("Performance Evaluations"), "route": "/performance-evaluation", "reference_doctype": "Performance Evaluation", "role": "Employee"}
+]
 
 # Installation
 # ------------
@@ -99,7 +112,13 @@ doctype_js = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+	"cron": {
+		"0/4 * * * *": [
+			"velometro.velometro.doctype.performance_report.performance_report.generate_reports"
+		]
+	}
+}
 # 	"all": [
 # 		"velometro.tasks.all"
 # 	],

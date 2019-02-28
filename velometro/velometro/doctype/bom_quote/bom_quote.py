@@ -9,7 +9,6 @@ import bisect
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc 
 from frappe.model.meta import get_field_currency
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 from frappe.defaults import get_user_default 
 from erpnext.setup.utils import get_exchange_rate
 import json
@@ -29,29 +28,17 @@ class BOMQuote(Document):
 		unit_pcost = 0 
 		total_time = 0 
 		unit_acost = 0
-		for purchased in self.items:
+		for purchased in self.items:	
+			quote_details = find_cheapest_price(purchased, purchased.qty_per_asm  * self.quantity)
+			
 			purchased.qty = purchased.qty_per_asm  * self.quantity
-			purchased.purchase_rate = get_item_price(purchased, self.company)
-			if not purchased.taxes:
-				purchased.taxes = 0 
-				if not purchased.freight:
-					purchased.freight = 0
-				fields = ["purchase_rate", "taxes", "freight"]
-				from_currency = purchased.currency
-				to_currency = self.currency
-				conversion_rate = get_exchange_rate(from_currency, to_currency)
-				if not conversion_rate:
-					conversion_rate = 0
-				#frappe.msgprint(conversion_rate)
-				for f in fields:
-					val = flt(flt(purchased.get(f), purchased.precision(f)) * conversion_rate, purchased.precision("base_" + f))
-					purchased.set("base_" + f, val) 
-					
-				purchased.unit_price = purchased.purchase_rate + purchased.taxes + purchased.freight
-				purchased.base_unit_price = purchased.base_purchase_rate + purchased.base_taxes + purchased.base_freight
-				purchased.total_price = purchased.base_unit_price * purchased.qty_per_asm
-				unit_pcost = unit_pcost  + (purchased.base_unit_price * purchased.qty_per_asm)
-		
+			if quote_details is not None:
+				purchased.purchase_rate = quote_details.rate
+				purchased.supplier_quotation_item = quote_details.supplier_quotation_item
+				purchased.revision = quote_details.revision
+				purchased.total_price = quote_details.rate * purchased.qty
+				unit_pcost += purchased.purchase_rate
+
 		for operations in self.operations:
 			total_time += operations.minutes
 			unit_acost += operations.total_cost
@@ -123,9 +110,6 @@ def get_purchase_item(item_code,qty):
 	doc = frappe.new_doc("BOM Costing Purchased Item") 
 	doc.item = item_code
 	doc.sort_name = item_code.lower()
-	doc.supplier = frappe.get_value("Item",doc.item,"default_supplier")
-	doc.price_list =  frappe.get_value("Item",doc.item,"default_supplier")
-	doc.currency = frappe.get_value("Supplier", doc.supplier,"default_currency") 
 	doc.description = frappe.get_value("Item",doc.item,"description")
 	doc.item_name= frappe.get_value("Item",doc.item,"item_name")
 	doc.qty_per_asm= qty
@@ -155,92 +139,50 @@ def get_bom_operation(bom, qty):
 	doc.operations = ", ".join(filter(None, operations))
 	doc.idx = None
 	return doc
-	
-def get_item_price(item, company):
-	"""Gets the item price from the price list taking in the total number of assemblies being made and name of the company"""
-	
-	#Get the Item 
-	item_doc = frappe.get_doc("Item",item.item)
 
-	args = {
-		"doctype": item.doctype,
-		"parent_type": item.parenttype,
-		"name": item_doc.name,
-		"item_code": item.item, 
-		"transaction_type": "buying",
-		"supplier": item.supplier,
-		"qty": item.qty,
-		"price_list": item.price_list, 
-		"company": company
-	}
-	args = frappe._dict(args) 
 	
-	#frappe.msgprint(str(args))
-	pr_price = 0		
-	pr_result = get_pricing_rule_for_item(args) 
-	if pr_result.pricing_rule:
-		#frappe.msgprint("Found pricing rule for " + item.item + ": " + pr_result.pricing_rule)
-		pricing_rule = frappe.get_doc("Pricing Rule", pr_result.pricing_rule)
-		pr_price = pricing_rule.price 
-	else:
-		#Need to find the item price
-		#frappe.msgprint("Could not find pricing rule for " + item.item )
-		pr_price = frappe.db.get_value("Item Price", {"price_list": item.price_list,"item_code": item.item}, "price_list_rate") or 0
-	return pr_price 
+def find_cheapest_price(item, qty):
+	"""Goes through all the supplier quotations to find the cheapest price with a quantity less than the indicated quantity"""
 	
-def get_taxes_charges(item, type, company):
-	#Get the Item 
-	item_doc = frappe.get_doc("Item",item.item)
-	total_qty = item.qty
-	args = {
-		"doctype": item.doctype,
-		"parent_type": item.parenttype,
-		"name": item_doc.name,
-		"item_code": item.item, 
-		"transaction_type": "buying",
-		"supplier": item.supplier,
-		"qty": item.qty,
-		"price_list": item.price_list, 
-		"company": company
-	}
-	#frappe.msgprint("{0}".format(args))
-	args = frappe._dict(args) 
-	pr_price = 0		
-	# Get the pricing rule
-	pr_result = get_pricing_rule_for_item(args) 
-	if pr_result.pricing_rule:
-		pricing_rule = frappe.get_doc("Pricing Rule", pr_result.pricing_rule)
+	
+	base_doc = frappe.get_doc("Item", item.item)
+	quote_details = find_version_pricing(item.item, qty, base_doc.revision)
+	
+	if quote_details.rate < 0:
+		# We need to see if there are previous versions that have been quoted
+		parent_doc = frappe.get_doc("Item", item.item)
+		versions = frappe.get_all('Item',filters={'variant_of': parent_doc.item_code}, fields=['item_code', 'revision'], order_by='revision desc')
 		
-		# Find the supplier quotation associated with this pricing rule
-		quotation = frappe.get_doc("Supplier Quotation", pricing_rule.from_supplier_quotation)
-		# Get the master quote quantity based on our total quantity for this part
-		qtylist = [] 	
-		for item in quotation.items:
-			if item.item_code == pricing_rule.item_code:
-				qtylist.append(item.qty)
-		qtylist.sort()
-		count = 0 
-		for i in qtylist: 
-			count = count + 1
-			if i == pricing_rule.min_qty:
-				break
+		for version in versions:
+			quote_details = find_version_pricing(version.item_code, qty, version.revision)
+			if quote_details.rate > 0:
+				
+				frappe.msgprint("Found OLD rate of {0}for {1} from {2}".format(quote_details.rate, item.item, quote_details.supplier_quotation_item))
+				return quote_details
+	else: 
+		frappe.msgprint("Found CORRECT rate of {0}for {1} from {2}".format(quote_details.rate, item.item, quote_details.supplier_quotation_item))
+		return quote_details
+	return None
+				
 			
-		if count > 0:
-			# Loop through each charge type to find the one with the correct quantity and type
-			applicable_charges = []
-			for tax_charge in quotation.taxes:
-				desc_list = "{" + tax_charge.description + "}"
-				args = frappe._dict(json.loads(desc_list))
-				if args.type == type:
-					applicable_charges.append(args.qty)
-			applicable_charges.sort()
-			for tax_charge in quotation.taxes:
-				desc_list = "{" + tax_charge.description + "}"
-				args = frappe._dict(json.loads("{" + desc_list + "}"))
-				if args.type == type and args.qty == applicable_charges[count-1]:
-					# We finally found the correct charge for freight
-					return tax_charge.price
+def find_version_pricing(item, qty, revision):
+	quote_details = {
+		"rate": -1,
+		"supplier_quotation_item":"",
+		"revision": revision
+		}
 		
-	else:
-		#Need to find the item price
-		return 0
+	quote_details = frappe._dict(quote_details) 
+	quotes = frappe.get_all('Supplier Quotation Item',filters={'item_code': item, 'docstatus':1}, fields=['name', 'qty', 'base_rate'])
+	for quote in quotes: 
+		if quote.qty < qty:
+			
+			# We have a valid quote
+			if(quote_details.rate < 0 or (quote_details.rate > 0 and quote.base_rate < quote_details.rate)):
+			
+				frappe.msgprint("Found rate of {0} for {1} from {2}".format(quote.base_rate,item,  quote.name ))
+				quote_details.supplier_quotation_item = quote.name
+				quote_details.rate = quote.base_rate
+		
+	return quote_details
+	
