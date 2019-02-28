@@ -183,10 +183,10 @@ def find_version_pricing(item, qty, revision):
 		}
 		
 	quote_details = frappe._dict(quote_details) 
-	quotes = frappe.get_all('Supplier Quotation Item',filters={'item_code': item, 'docstatus':1}, fields=['name', 'qty', 'base_rate'])
+	quotes = frappe.get_all('Supplier Quotation Item',filters={'item_code': item, 'docstatus':1}, fields=['name', 'qty', 'base_rate', 'conversion_factor'])
 	for quote in quotes: 
 		if quote.qty < qty:
-			suom_rate = quote.base_rate / quote.conversion_rate
+			suom_rate = quote.base_rate / quote.conversion_factor
 			# We have a valid quote
 			if(quote_details.rate < 0 or (quote_details.rate > 0 and suom_rate < quote_details.rate)):
 			
