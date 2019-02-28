@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{% block title %} {{ title | striptags }} {% endblock %}</title>
+	<meta name="generator" content="frappe">
+
+    {% block favicon %}
+	<link rel="shortcut icon"
+		href="{{ (favicon or "/assets/frappe/images/favicon.png") | abs_url }}"
+		type="image/x-icon">
+	<link rel="icon"
+		href="{{ (favicon or "/assets/frappe/images/favicon.png") | abs_url }}"
+		type="image/x-icon">
+    {% endblock %}
+	{%- block head -%}
+		{% if meta_block is defined -%}
+		{{ meta_block }}
+		{%- endif %}
+
+		{% if head_html is defined -%}
+		{{ head_html or "" }}
+		{%- endif %}
+
+		{%- for link in web_include_css %}
+		<link type="text/css" rel="stylesheet" href="{{ link|abs_url }}">
+		{%- endfor -%}
+
+	    {%- block head_include %}{{ head_include or "" }}{% endblock -%}
+
+		{%- block style %}{%- endblock -%}
+	{%- endblock -%}
+    <script>
+		window.frappe = {};
+		frappe.ready_events = [];
+		frappe.ready = function(fn) {
+			frappe.ready_events.push(fn);
+		}
+		window.dev_server = {{ dev_server }};
+    </script>
+</head>
+<body data-path="{{ path }}">
+	<div class="main-section">
+		<div>
+			<header>
+			{%- block banner -%}
+				{% include "templates/includes/banner_extension.html" ignore missing %}
+				{% if banner_html -%}
+				<div class="container">
+					<div class='banner'>
+						{{ banner_html or "" }}
+					</div>
+				</div>
+				{%- endif %}
+			{%- endblock -%}
+
+			{%- block navbar -%}
+                {% include "templates/includes/navbar/navbar.html" %}
+            {%- endblock -%}
+			</header>
+
+            <div class="hero-and-content">
+                <div data-html-block="hero">
+				{%- block hero -%}{%- endblock -%}
+                </div>
+                <div class="container">
+                {% block content %}{% endblock %}
+				THIS IS A TEST
+				<form>
+					Card Number:  
+					  <input type="text" name="cardnum" value ="4242424242424242"><br>
+					  Expiry Month:  
+					  <input type="text" name="month" value="08"><br>
+					  Expiry Year:  
+					  <input type="text" name="year" value="18"><br>
+					  CCV:  
+					  <input type="text" name="ccv" value="123"><br>
+					  <input type="button" name="button" onClick="getCardToken(this.form)" value="Submit">
+				</form>
+				<script>
+					function getCardToken(form) {
+						let publicEncryptionKey = "2d2d2d2d2d424547494e205055424c4943204b45592d2d2d2d2d4d494942496a414e42676b71686b6947397730424151454641414f43415138414d49494243674b43415145416b4f61446f42695537514d474e4f667a353454375630617a536172684972572f536447587170676754687a76677843465035374e6f4b6450546b64455a45366f4d5234757a4d2f5a6e7864736c737652544f707642306c6b6f6d35385449504664645434353641542b51453659507a5874304b522b374a5a2b63716c582b414f61536177644b4634512b574e65396862707a32465a78376f33376233726c306f69614f332f704f61646e3868716a71614d474c7368536b31626a6652532b5342737559316b497566494a69347070412b71787663383347677367764b792b724643444d4c6c48362f3335556b5631466c724c57647670592f7752574c317247665a55452b74774e7a5a797175364477446d4c743865686d464b564f5a71304d7336716e6d3852444471545850302b512b2b33734b332b6c5167456f30566f3569714a576d6c6c342f396b697737453465434c324675514944415141422d2d2d2d2d454e44205055424c4943204b45592d2d2d2d2d";
+						
+						let cardNumber = form.cardnum.value;
+						let cardMonth = form.month.value;
+						let cardYear = form.year.value;
+						let cardCvv2 = form.ccv.value;
+						
+						let encryptedCard = window.PayfirmaCardEncryption(publicEncryptionKey, cardNumber, cardMonth, cardYear, cardCvv2);
+						console.log(encryptedCard);
+						
+						let transactionObject = {
+							amount: 0.01,
+							currency: "CAD",
+							token: encryptedCard,
+							email: "goku.son@payfirma.com",
+							first_name: "Goku",
+							last_name: "Son",
+							company: "Capsule Corporation",
+							telephone: "123-456-7890"
+						};
+						
+						console.log(transactionObject);
+						
+						let bearerToken = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhY2Nlc3NfdG9rZW4iOiI2ZjBhY2VjYS0yZGViLTRkMjktYjk4Yy1mNjgzZWJhM2MxNGMiLCJzY29wZSI6WyJjdXN0b21lciIsInRyYW5zYWN0aW9uIl0sIm1lcmNoYW50X2lkIjoiZGJjNjU1MWM0MyIsImV4cCI6MTgzMTMwOTQxOH0.v9Fiu4IA2vgj8LggeWiB8w88-j6PpupZ3IEeNasFpYU";
+						
+						let request = new XMLHttpRequest();
+						request.open("POST", "https://sandbox-apigateway.payfirma.com/transaction-service/sale");
+						request.setRequestHeader("Content-Type", "application/json");
+						request.setRequestHeader("Authorization", bearerToken);
+						let mine = JSON.stringify(transactionObject);
+						request.send(mine);
+						console.log(mine);
+						console.log(request);
+					}
+					
+					
+				</script>
+                </div>
+            </div>
+			{%- if footer is defined -%}
+			<footer class="page-footer">
+				<div class="container">
+					{{ footer }}
+				</div>
+			</footer>
+			{%- endif -%}
+		</div>
+		<div>
+			{%- block footer -%}{% include "templates/includes/footer/footer.html" %}{%- endblock -%}
+		</div>
+	</div>
+	{% block base_scripts %}
+	<!-- js should be loaded in body! -->
+	<script type="text/javascript"
+		src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+	<script type="text/javascript"
+		src="/assets/js/frappe-web.min.js"></script>
+	<script type="text/javascript"
+		src="/payfirma-card-encryption-min.js"></script>
+	{% endblock %}
+    {%- if js_globals is defined %}
+    <script>
+    {%- for key, value in js_globals.iteritems() %}
+    window.{{ key }} = "{{ value[0] }}";
+    {%- endfor -%}
+    </script>
+    {% endif -%}
+
+	{%- for link in web_include_js %}
+	<script type="text/javascript" src="{{ link|abs_url }}"></script>
+	{%- endfor -%}
+
+    {%- block script %}{%- endblock %}
+
+	<!-- csrf_token -->
+
+    {%- block body_include %}{{ body_include or "" }}{% endblock -%}
+</body>
+</html>
