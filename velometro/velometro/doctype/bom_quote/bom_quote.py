@@ -37,7 +37,7 @@ class BOMQuote(Document):
 				purchased.supplier_quotation_link = quote_details.supplier_quotation_parent
 				purchased.revision = quote_details.revision
 				purchased.total_price = quote_details.rate * purchased.qty
-				unit_pcost += purchased.purchase_rate
+				unit_pcost += purchased.qty_per_asm  * purchased.purchase_rate
 
 		for operations in self.operations:
 			total_time += operations.minutes
@@ -58,17 +58,7 @@ class BOMQuote(Document):
 			self.operations = []
 		add_bom_level(self, 1, self.master_bom)
 		
-		#Sort by item code and reassign idx
-		self.items.sort(key=getKey)
-		idx = 1
-		for itm in self.items:
-			itm.idx = idx
-			itm.parent = self.name
-			itm.parenttype = "BOM Quote"
-			idx += 1
-		
 		# Merge duplicates
-		
 		i = 0
 		while i < (len(self.items) - 1):
 			if self.items[i].item == self.items[i+1].item:
@@ -77,6 +67,16 @@ class BOMQuote(Document):
 			else:
 				i+=1
 			
+			#Sort by item code and reassign idx
+		self.items.sort(key=getKey)
+		idx = 1
+		for itm in self.items:
+			itm.idx = idx
+			itm.parent = self.name
+			itm.parenttype = "BOM Quote"
+			idx += 1
+		
+		
 		#Sort by bom_no and reassign idx
 		self.operations.sort( key=getKey)
 		idx = 1
@@ -161,8 +161,8 @@ def find_cheapest_price(item, qty):
 	
 	if quote_details.rate < 0:
 		# We need to see if there are previous versions that have been quoted
-		parent_doc = frappe.get_doc("Item", item.item)
-		versions = frappe.get_all('Item',filters={'variant_of': parent_doc.item_code}, fields=['item_code', 'revision'], order_by='revision desc')
+		parent_doc = frappe.get_value("Item", item.item, "variant_of")
+		versions = frappe.get_all('Item',filters={'variant_of': parent_doc}, fields=['item_code', 'revision'], order_by='revision desc')
 		
 		for version in versions:
 			quote_details = find_version_pricing(version.item_code, qty, version.revision)
@@ -186,10 +186,10 @@ def find_version_pricing(item, qty, revision):
 	quote_details = frappe._dict(quote_details) 
 	quotes = frappe.get_all('Supplier Quotation Item',filters={'item_code': item, 'docstatus':1}, fields=['name', 'qty', 'base_rate', 'conversion_factor', 'parent'])
 	for quote in quotes: 
-		if quote.qty < qty:
+		if quote.qty <= qty:
 			suom_rate = quote.base_rate / quote.conversion_factor
 			# We have a valid quote
-			if(quote_details.rate < 0 or (quote_details.rate > 0 and suom_rate < quote_details.rate)):
+			if(quote_details.rate < 0 or (quote_details.rate > 0 and suom_rate > 0 and suom_rate < quote_details.rate)):
 			
 				#frappe.msgprint("Found rate of {0} for {1} from {2}".format(suom_rate,item,  quote.name ))
 				quote_details.supplier_quotation_parent = quote.parent
