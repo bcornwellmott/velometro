@@ -1,0 +1,36 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 0, 
+ "creation": "2019-03-07 15:10:16.727589", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "letter_head": "Standard", 
+ "modified": "2019-03-07 15:10:16.727589", 
+ "modified_by": "Administrator", 
+ "module": "Velometro", 
+ "name": "IRAP Timesheet Summary", 
+ "owner": "Administrator", 
+ "ref_doctype": "Timesheet", 
+ "report_name": "IRAP Timesheet Summary", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Projects User"
+  }, 
+  {
+   "role": "HR User"
+  }, 
+  {
+   "role": "Manufacturing User"
+  }, 
+  {
+   "role": "Employee"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ]
+}
